@@ -1,58 +1,89 @@
-# Financial performance loss functions for E2E learning framework
-#
-####################################################################################################
-## Import libraries
-####################################################################################################
 import torch
+from torch import Tensor
 
-####################################################################################################
-# Performance loss functions
-####################################################################################################
-def single_period_loss(z_star, y_perf):
-    """Loss function based on the out-of-sample portfolio return
 
-    Compute the out-of-sample portfolio return for portfolio z_t over the next time step. The
-    loss is aggregated for all z_t in Z_star and averaged over the number of observations.
-
-    Inputs
-    z_star: Optimal solution. (n_y x 1) tensor of optimal decisions.
-    y_perf: Realizations. (perf_period x n_y) tensor of realized values.
-
-    Output
-    loss: realized return at time 't' 
+# Performance loss functions with type hints and improved comments
+def single_period_loss(z_star: Tensor, y_perf: Tensor) -> Tensor:
     """
-    loss = -y_perf[0] @ z_star 
-    return loss
+    Calculate the single-period loss based on the out-of-sample portfolio return.
 
-def single_period_over_var_loss(z_star, y_perf):
-    """Loss function based on the out-of-sample portfolio return over volatility
+    This function computes the out-of-sample portfolio return for a given portfolio over the next
+    time step. It computes the loss as the negative return since optimization typically focuses
+    on minimizing the loss, and maximizing returns translates into minimizing negative returns.
 
-    Compute the out-of-sample portfolio return for portfolio z_star over the next time step. Divide
-    by the realized volatility over the performance period ('perf_period')
-
-    Inputs
-    z_star: Optimal solution. (n_y x 1) tensor of optimal decisions.
-    y_perf: Realizations. (perf_period x n_y) tensor of realized values.
-
-    Output
-    loss: realized return at time 't' over realized volatility from 't' to 't + perf_period'
+    :param z_star: Tensor of shape (n_y, 1) representing the optimal portfolio weights.
+    :param y_perf: Tensor of shape (perf_period, n_y) representing the realized returns.
+    :return: A scalar tensor representing the realized return at the first time step (negative).
     """
-    loss = -y_perf[0] @ z_star / torch.std(y_perf @ z_star)
-    return loss
+    # Calculate the portfolio return for the first time step and negate it (since we want to minimize loss)
+    return -y_perf[0] @ z_star
 
-def sharpe_loss(z_star, y_perf):
-    """Loss function based on the out-of-sample Sharpe ratio
 
-    Compute the out-of-sample Sharpe ratio of the portfolio z_t over the next 12 time steps. The
-    loss is aggregated for all z_t in Z_star and averaged over the number of observations. We use a
-    simplified version of the Sharpe ratio, SR = realized mean / realized std dev.
-
-    Inputs
-    z_star: Optimal solution. (n_y x 1) tensor of optimal decisions.
-    y_perf: Realizations. (perf_period x n_y) tensor of realized values.
-
-    Output
-    loss: realized average return over realized volatility from 't' to 't + perf_period'
+def single_period_over_var_loss(z_star: Tensor, y_perf: Tensor) -> Tensor:
     """
-    loss = -torch.mean(y_perf @ z_star) / torch.std(y_perf @ z_star)
-    return loss
+    Calculate the loss as the portfolio return divided by the portfolio's volatility.
+
+    This function computes the portfolio return at the first time step and divides it by the
+    realized volatility (standard deviation) of the portfolio returns over the performance period.
+    This provides a return-over-risk measure, which is often used in portfolio analysis.
+
+    :param z_star: Tensor of shape (n_y, 1) representing the optimal portfolio weights.
+    :param y_perf: Tensor of shape (perf_period, n_y) representing the realized returns.
+    :return: A scalar tensor representing the return over realized volatility (negative).
+    """
+    # Calculate the portfolio returns over the entire performance period
+    portfolio_returns = y_perf @ z_star
+    # Calculate the standard deviation (volatility) of the portfolio returns, adding epsilon for numerical stability
+    volatility = torch.std(portfolio_returns, unbiased=True) + 1e-6
+    # Calculate the return at the first time step and divide by the volatility, then negate for loss
+    return -portfolio_returns[0] / volatility
+
+
+def sharpe_loss(z_star: Tensor, y_perf: Tensor) -> Tensor:
+    """
+    Calculate the loss based on the Sharpe ratio over a performance period.
+
+    This function computes a simplified Sharpe ratio, which is the ratio of the mean portfolio
+    return to its standard deviation (volatility) over the performance period. The loss is defined
+    as the negative Sharpe ratio to allow for minimization.
+
+    :param z_star: Tensor of shape (n_y, 1) representing the optimal portfolio weights.
+    :param y_perf: Tensor of shape (perf_period, n_y) representing the realized returns.
+    :return: A scalar tensor representing the negative Sharpe ratio.
+    """
+    # Calculate the portfolio returns over the entire performance period
+    portfolio_returns = y_perf @ z_star
+    # Calculate the mean return of the portfolio
+    mean_return = torch.mean(portfolio_returns)
+    # Calculate the standard deviation (volatility) of the portfolio returns, adding epsilon for numerical stability
+    volatility = torch.std(portfolio_returns, unbiased=True) + 1e-6
+    # Calculate the Sharpe ratio and negate it for loss
+    return -mean_return / volatility
+
+
+if __name__ == "__main__":
+    # Example portfolio weights (3 assets)
+    z_star = torch.tensor([0.3, 0.5, 0.2])
+    # Realized returns for 3 assets over 3 periods
+    y_perf = torch.tensor(
+        [
+            [0.01, 0.02, -0.01],
+            [0.03, -0.01, 0.04],
+            [0.02, 0.01, 0.01],
+        ]
+    )
+
+    # Test the single-period loss function
+    print("Testing single_period_loss...")
+    loss_sp = single_period_loss(z_star, y_perf)
+    print(f"Single period loss: {loss_sp.item()}")
+
+    # Test the single-period-over-volatility loss function
+    print("\nTesting single_period_over_var_loss...")
+    loss_sp_var = single_period_over_var_loss(z_star, y_perf)
+    print(f"Single period loss over volatility: {loss_sp_var.item()}")
+
+    # Test the Sharpe ratio loss function
+    print("\nTesting sharpe_loss...")
+    loss_sharpe = sharpe_loss(z_star, y_perf)
+    print(f"Sharpe ratio loss: {loss_sharpe.item()}")
