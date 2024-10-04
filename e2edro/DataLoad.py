@@ -1,7 +1,7 @@
 # DataLoad module
 #
 ####################################################################################################
-# Import libraries
+## Import libraries
 ####################################################################################################
 import torch
 import torch.nn as nn
@@ -11,14 +11,13 @@ import numpy as np
 from alpha_vantage.timeseries import TimeSeries
 import time
 import statsmodels.api as sm
-from typing import List, Tuple, Optional
 
 
 ####################################################################################################
 # TrainTest class
 ####################################################################################################
 class TrainTest:
-    def __init__(self, data: pd.DataFrame, n_obs: int, split: List[float]) -> None:
+    def __init__(self, data, n_obs, split):
         """Object to hold the training, validation and testing datasets
 
         Inputs
@@ -39,18 +38,18 @@ class TrainTest:
         numel = n_obs_tot * np.cumsum(split)
         self.numel = [round(i) for i in numel]
 
-    def split_update(self, split: List[float]) -> None:
+    def split_update(self, split):
         """Update the list outlining the split ratio of training, validation and testing"""
         self.split = split
         n_obs_tot = self.data.shape[0]
         numel = n_obs_tot * np.cumsum(split)
         self.numel = [round(i) for i in numel]
 
-    def train(self) -> pd.DataFrame:
+    def train(self):
         """Return the training subset of observations"""
         return self.data[: self.numel[0]]
 
-    def test(self) -> pd.DataFrame:
+    def test(self):
         """Return the test subset of observations"""
         return self.data[self.numel[0] - self.n_obs : self.numel[1]]
 
@@ -58,14 +57,7 @@ class TrainTest:
 ####################################################################################################
 # Generate linear synthetic data
 ####################################################################################################
-def synthetic(
-    n_x: int = 5,
-    n_y: int = 10,
-    n_tot: int = 1200,
-    n_obs: int = 104,
-    split: List[float] = [0.6, 0.4],
-    set_seed: int = 100,
-) -> Tuple[TrainTest, TrainTest]:
+def synthetic(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=100):
     """Generates synthetic (normally-distributed) asset and factor data
 
     Inputs
@@ -77,8 +69,8 @@ def synthetic(
     set_seed: Integer. Used for replicability of the numpy RNG.
 
     Outputs
-    X: TrainTest object with feature data split into train, validation and test subsets
-    Y: TrainTest object with asset data split into train, validation and test subsets
+    X: TrainValTest object with feature data split into train, validation and test subsets
+    Y: TrainValTest object with asset data split into train, validation and test subsets
     """
     np.random.seed(set_seed)
 
@@ -90,7 +82,7 @@ def synthetic(
     # Noise std dev
     s = np.sort(np.random.rand(n_y)) / 20 + 0.02
 
-    # Synthetic features
+    # Syntehtic features
     X = np.random.randn(n_tot, n_x) / 50
     X2 = np.random.randn(n_tot, int((n_x + 1) / 2)) / 50
 
@@ -107,14 +99,7 @@ def synthetic(
 ####################################################################################################
 # Generate non-linear synthetic data
 ####################################################################################################
-def synthetic_nl(
-    n_x: int = 5,
-    n_y: int = 10,
-    n_tot: int = 1200,
-    n_obs: int = 104,
-    split: List[float] = [0.6, 0.4],
-    set_seed: int = 100,
-) -> Tuple[TrainTest, TrainTest]:
+def synthetic_nl(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=100):
     """Generates synthetic (normally-distributed) factor data and mix them following a quadratic
     model of linear, squared and cross products to produce the asset data.
 
@@ -127,8 +112,8 @@ def synthetic_nl(
     set_seed: Integer. Used for replicability of the numpy RNG.
 
     Outputs
-    X: TrainTest object with feature data split into train, validation and test subsets
-    Y: TrainTest object with asset data split into train, validation and test subsets
+    X: TrainValTest object with feature data split into train, validation and test subsets
+    Y: TrainValTest object with asset data split into train, validation and test subsets
     """
     np.random.seed(set_seed)
 
@@ -141,7 +126,7 @@ def synthetic_nl(
     # Noise std dev
     s = np.sort(np.random.rand(n_y)) / 20 + 0.02
 
-    # Synthetic features
+    # Syntehtic features
     X = np.random.randn(n_tot, n_x) / 50
     X2 = np.random.randn(n_tot, int((n_x + 1) / 2)) / 50
     X_cross = 100 * (X[:, :, None] * X[:, None, :]).reshape(n_tot, n_x**2)
@@ -158,16 +143,11 @@ def synthetic_nl(
 
 
 ####################################################################################################
-# Generate non-linear synthetic data using Neural Network
+# Generate non-linear synthetic data
 ####################################################################################################
 def synthetic_NN(
-    n_x: int = 5,
-    n_y: int = 10,
-    n_tot: int = 1200,
-    n_obs: int = 104,
-    split: List[float] = [0.6, 0.4],
-    set_seed: int = 45678,
-) -> Tuple[TrainTest, TrainTest]:
+    n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=45678
+):
     """Generates synthetic (normally-distributed) factor data and mix them following a
     randomly-initialized 3-layer neural network.
 
@@ -180,12 +160,12 @@ def synthetic_NN(
     set_seed: Integer. Used for replicability of the numpy RNG.
 
     Outputs
-    X: TrainTest object with feature data split into train, validation and test subsets
-    Y: TrainTest object with asset data split into train, validation and test subsets
+    X: TrainValTest object with feature data split into train, validation and test subsets
+    Y: TrainValTest object with asset data split into train, validation and test subsets
     """
     np.random.seed(set_seed)
 
-    # Synthetic features
+    # Syntehtic features
     X = np.random.randn(n_tot, n_x) * 10 + 0.5
 
     # Initialize NN object
@@ -207,7 +187,7 @@ def synthetic_NN(
 class synthetic3layer(nn.Module):
     """End-to-end DRO learning neural net module."""
 
-    def __init__(self, n_x: int, n_y: int, set_seed: int) -> None:
+    def __init__(self, n_x, n_y, set_seed):
         """End-to-end learning neural net module
 
         This NN module implements a linear prediction layer 'pred_layer' and a DRO layer
@@ -237,30 +217,27 @@ class synthetic3layer(nn.Module):
             nn.Linear(n_y, n_y),
         )
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
+    # -----------------------------------------------------------------------------------------------
+    # forward: forward pass of the synthetic3layer NN
+    # -----------------------------------------------------------------------------------------------
+    def forward(self, X):
         """Forward pass of the NN module
 
         Inputs
         X: Features. (n_obs x n_x) torch tensor with feature timeseries data
 
         Outputs
-        Y: Synthetically generated output. (n_obs x n_y) torch tensor of outputs
+        Y: Syntheticly generated output. (n_obs x n_y) torch tensor of outputs
         """
         Y = torch.stack([self.pred_layer(x_t) for x_t in X])
+
         return Y
 
 
 ####################################################################################################
 # Synthetic data with Gaussian and exponential noise terms
 ####################################################################################################
-def synthetic_exp(
-    n_x: int = 5,
-    n_y: int = 10,
-    n_tot: int = 1200,
-    n_obs: int = 104,
-    split: List[float] = [0.6, 0.4],
-    set_seed: int = 123,
-) -> Tuple[TrainTest, TrainTest]:
+def synthetic_exp(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=123):
 
     np.random.seed(set_seed)
 
@@ -279,7 +256,7 @@ def synthetic_exp(
     alpha = np.sort(np.random.rand(n_y).clip(0.2, 1) / 1000)
     beta = np.random.randn(n_x, n_y).clip(-3, 3) / n_x
 
-    # Synthetic features
+    # Syntehtic features
     X = np.random.randn(n_tot, n_x).clip(-3, 3) / 10
 
     # Synthetic outputs
@@ -301,14 +278,14 @@ def synthetic_exp(
 def AV(
     start: str,
     end: str,
-    split: List[float],
+    split: list,
     freq: str = "weekly",
     n_obs: int = 104,
-    n_y: Optional[int] = None,
+    n_y=None,
     use_cache: bool = False,
     save_results: bool = False,
-    AV_key: Optional[str] = None,
-) -> Tuple[TrainTest, TrainTest]:
+    AV_key: str = None,
+):
     """Load data from Kenneth French's data library and from AlphaVantage
     https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html
     https://www.alphavantage.co
@@ -325,12 +302,12 @@ def AV(
         Data frequency (daily, weekly, monthly). The default is 'weekly'.
     n_obs : int, optional
         Number of observations per batch. The default is 104.
-    n_y : int, optional
+    n_y : TYPE, optional
         Number of features to select. If None, the maximum number (8) is used. The default is None.
     use_cache : bool, optional
         State whether to load cached data or download data. The default is False.
     save_results : bool, optional
-        State whether the data should be cached for future use. The default is False.
+        State whether the data should be cached for future use. . The default is False.
     AV_key : str, optional
         AlphaVantage user key to access their API. Keys are free for academic users. The default
         is None.
