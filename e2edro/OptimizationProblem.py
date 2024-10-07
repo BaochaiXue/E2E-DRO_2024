@@ -6,13 +6,13 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 
-import RiskFunctions as rf
-import LossFunctions as lf
-import PortfolioClasses as pc
-import DataLoad as dl
+import e2edro.RiskFunctions as rf
+import e2edro.LossFunctions as lf
+import e2edro.PortfolioClasses as pc
+import e2edro.DataLoad as dl
 from collections.abc import Callable
 import psutil
-from RiskFunctions import p_var, p_mad
+from e2edro.RiskFunctions import p_var, p_mad
 
 
 num_cores: int = psutil.cpu_count()
