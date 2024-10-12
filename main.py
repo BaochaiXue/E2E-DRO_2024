@@ -3,6 +3,10 @@
 ####################################################################################################
 # Import libraries
 ####################################################################################################
+from e2edro import PlotFunctions as pf
+from e2edro import BaseModels as bm
+from e2edro import DataLoad as dl
+from e2edro import e2edro as e2e
 import torch
 import pandas as pd
 import numpy as np
@@ -15,10 +19,6 @@ plt.close("all")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Import E2E_DRO functions
-from e2edro import e2edro as e2e
-from e2edro import DataLoad as dl
-from e2edro import BaseModels as bm
-from e2edro import PlotFunctions as pf
 
 # Path to cache the data, models and results
 cache_path = "./cache/exp/"
@@ -163,7 +163,8 @@ else:
     print("ew_net run complete")
 
     # Exp 1, 2, 3: Predict-then-optimize system
-    po_net = bm.pred_then_opt(n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk).double()
+    po_net = bm.pred_then_opt(
+        n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk).double()
     po_net.net_roll_test(X, Y)
     with open(cache_path + "po_net.pkl", "wb") as outp:
         pickle.dump(po_net, outp, pickle.HIGHEST_PROTOCOL)
@@ -436,7 +437,8 @@ portfolios = [
 exp1_fin_table = pf.fin_table(portfolios, portfolio_names)
 
 # Wealth evolution plot
-portfolio_colors = ["dimgray", "forestgreen", "goldenrod", "dodgerblue", "salmon"]
+portfolio_colors = ["dimgray", "forestgreen",
+                    "goldenrod", "dodgerblue", "salmon"]
 pf.wealth_plot(
     portfolios,
     portfolio_names,
@@ -482,7 +484,8 @@ exp2_validation_table.set_axis(["eta", "Epochs", "DR (learn delta)"], axis=1)
 
 plt.rcParams["text.usetex"] = True
 portfolio_names = [r"PO", r"DR", r"DR (learn $\delta$)"]
-portfolios = [po_net.portfolio, dr_po_net.portfolio, dr_net_learn_delta.portfolio]
+portfolios = [po_net.portfolio, dr_po_net.portfolio,
+              dr_net_learn_delta.portfolio]
 
 # Out-of-sample summary statistics table
 exp2_fin_table = pf.fin_table(portfolios, portfolio_names)
@@ -597,8 +600,10 @@ exp3_trained_vals = pd.DataFrame(
     zip(
         [nom_net_learn_gamma.gamma_init] + nom_net_learn_gamma.gamma_trained,
         [dr_net_learn_gamma.gamma_init] + dr_net_learn_gamma.gamma_trained,
-        [dr_net_learn_gamma_delta.gamma_init] + dr_net_learn_gamma_delta.gamma_trained,
-        [dr_net_learn_gamma_delta.delta_init] + dr_net_learn_gamma_delta.delta_trained,
+        [dr_net_learn_gamma_delta.gamma_init] +
+        dr_net_learn_gamma_delta.gamma_trained,
+        [dr_net_learn_gamma_delta.delta_init] +
+        dr_net_learn_gamma_delta.delta_trained,
     ),
     columns=["Nom. gamma", "DR gamma", "DR gamma 2", "DR delta"],
 )
@@ -726,7 +731,8 @@ n_x, n_y = 5, 10
 n_obs, n_tot = 100, 1200
 
 # Synthetic data: randomly generate data from a linear model
-X, Y = dl.synthetic_exp(n_x=n_x, n_y=n_y, n_obs=n_obs, n_tot=n_tot, split=split)
+X, Y = dl.synthetic_exp(n_x=n_x, n_y=n_y, n_obs=n_obs,
+                        n_tot=n_tot, split=split)
 
 # ---------------------------------------------------------------------------------------------------
 # Experiment 5: Initialize parameters

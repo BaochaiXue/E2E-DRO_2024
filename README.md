@@ -1,29 +1,53 @@
-# Distributionally Robust End-to-End Portfolio Construction
+# Forked: Distributionally Robust End-to-End Portfolio Construction
 
-This repository contains the source code to reproduce the numerical results in our paper [Distributionally Robust End-to-End Portfolio Construction](https://arxiv.org/abs/2206.05134). Our paper introduces a robust end-to-end (E2E) learning system where the final decision layer is based on a distributionally robust (DR) optimization model for portfolio construction. This repository was created by [Giorgio Costa](https://gcosta151.github.io) and [Garud Iyengar](http://www.columbia.edu/~gi10/), and belongs to Iyengar Lab in the IEOR Department at Columbia University.
+Welcome to the forked version of the [Distributionally Robust End-to-End Portfolio Construction](https://arxiv.org/abs/2206.05134) repository. This fork includes modifications to ensure compatibility with **Python 3.12** and **PyTorch 2.x**, enabling improved performance and leveraging the latest features of these platforms.
 
-# Introduction
-We propose an end-to-end distributionally robust system for portfolio construction that integrates the asset return prediction model with a distributionally robust portfolio optimization model. We also show how to learn the risk-tolerance parameter and the degree of robustness directly from data. End-to-end systems have an advantage in that information can be communicated between the prediction and decision layers during training, allowing the parameters to be trained for the final task rather than solely for predictive performance. However, existing end-to-end systems are not able to quantify and correct for the impact of model risk on the decision layer. Our proposed distributionally robust end-to-end portfolio selection system explicitly accounts for the impact of model risk. The decision layer chooses portfolios by solving a minimax problem where the distribution of the asset returns is assumed to belong to an ambiguity set centered around a nominal distribution. Using convex duality, we recast the minimax problem in a form that allows for efficient training of the end-to-end system.
+## Table of Contents
 
-A copy of our paper is available in arXiv: [https://arxiv.org/abs/2206.05134](https://arxiv.org/pdf/2206.05134.pdf)
+- [Overview](#overview)
+- [Original Project](#original-project)
+- [Key Enhancements](#key-enhancements)
+- [Dependencies](#dependencies)
+- [Acknowledgments](#acknowledgments)
 
-# Dependencies
-- Python 3.x/numpy/scipy/pandas/matplotlib
-- cvxpy 1.x
-- cvxpylayers 0.1.x
-- PyTorch 1.x
-- pandas_datareader/alpha_vantage
+## Overview
 
-# Usage
-This repository contains all the files and data used to generate the experimental results in our paper. To reproduce the experimental results, please refer to the main.py file.
+This repository is a fork of the original [Distributionally Robust End-to-End Portfolio Construction](https://arxiv.org/abs/2206.05134) project. The primary objective of this fork is to update the codebase to be compatible with **Python 3.12** and **PyTorch 2.x**, ensuring that users can leverage the latest advancements and maintain compatibility with modern development environments.
 
-Anyone wishing to design their own robust portfolios should refer to the e2edro module. The e2edro module contains the following files:
-- e2edro.py: Allows one to construct DR E2E objects. 
-- RiskFunctions.py: Includes two alternative deviation risk functions that can be called by e2edro objects. These are the portfolio variance and portfolio mean absolute deviation.
-- LossFunctions.py: Includes three alternative loss functions for end-to-end learning. These are the portfolio return, the portfolio Sharpe ratio, and the portfolio single-period return over the portfolio multi-period standard deviation.
-- PortfolioClasses.py: Includes multiple objects used to store experimental data and results, as well as portfolio backtest results. 
-- BaseModels.py: Allows one to construct naive models without end-to-end learning. These are used as competing models in the numerical experiments.
-- DataLoad.py: Provides code to download factor data from Kenneth French's data library (https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html) and asset data from AlphaVantage (www.alphavantage.co). It also includes functtions to generate synthetic data. 
+## Original Project
 
-# Licensing
-Unless otherwise stated, the source code is copyright of Columbia University and licensed under the Apache 2.0 License.
+The original repository was developed by [Giorgio Costa](https://gcosta151.github.io) and [Garud Iyengar](http://www.columbia.edu/~gi10/), from the Iyengar Lab in the IEOR Department at Columbia University. The project accompanies their paper:
+
+**[Distributionally Robust End-to-End Portfolio Construction](https://arxiv.org/abs/2206.05134)**
+
+This work introduces a robust end-to-end (E2E) learning system where the final decision layer leverages a distributionally robust (DR) optimization model for portfolio construction. The system integrates asset return prediction with DR optimization, allowing for the learning of risk-tolerance parameters and the degree of robustness directly from data.
+
+## Key Enhancements
+
+This fork introduces the following key enhancements to the original repository:
+
+- **Python 3.12 Compatibility**: Updated the codebase to leverage new features and optimizations available in Python 3.12.
+- **PyTorch 2.x Support**: Upgraded PyTorch dependencies to version 2.x, ensuring compatibility with the latest PyTorch features and improvements.
+- **Dependency Updates**: Refreshed and optimized other dependencies to align with Python 3.12 and PyTorch 2.x requirements.
+
+## Dependencies
+
+Ensure you have the following dependencies installed. Versions have been updated to support Python 3.12 and PyTorch 2.x:
+
+- **Python 3.12**
+- **NumPy**: `>=1.23.0`
+- **SciPy**: `>=1.9.0`
+- **Pandas**: `>=1.5.0`
+- **Matplotlib**: `>=3.6.0`
+- **cvxpy**: `>=1.3.0`
+- **cvxpylayers**: `>=0.1.7`
+- **PyTorch**: `>=2.0.0`
+- **pandas_datareader**: `>=0.10.0`
+- **alpha_vantage**: `>=2.3.0`
+
+
+## Acknowledgments
+
+- Original repository by [Giorgio Costa](https://gcosta151.github.io) and [Garud Iyengar](http://www.columbia.edu/~gi10/), Iyengar Lab, IEOR Department, Columbia University.
+- Thanks to the contributors and the open-source community for their valuable tools and libraries.
+
