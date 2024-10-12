@@ -10,9 +10,13 @@ from scipy.stats.mstats import gmean
 
 # Matplotlib parameters
 plt.close("all")
-plt.rcParams["font.family"] = "serif"
-plt.rcParams["axes.xmargin"] = 0
-plt.rcParams["text.usetex"] = True
+plt.rcParams["font.family"] = "serif"  # font family
+plt.rcParams["axes.xmargin"] = 0  # x margin
+plt.rcParams["text.usetex"] = True  # use latex
+####################################################################################################
+# check if you want to save in eps format, eps is a format that is used in latex
+####################################################################################################
+eps_format: bool = False
 
 ####################################################################################################
 # Ploting functions
@@ -90,7 +94,8 @@ def wealth_plot(portfolio_list, names, colors, nplots=1, path=None):
 
     if path is not None:
         fig.savefig(path, bbox_inches="tight")
-        fig.savefig(path[0:-3] + "ps", bbox_inches="tight", format="ps")
+        if eps_format:
+            fig.savefig(path[0:-3] + "eps", bbox_inches="tight", format="eps")
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -136,7 +141,8 @@ def sr_plot(portfolio_list, names, colors, path=None):
 
     if path is not None:
         fig.savefig(path, bbox_inches="tight")
-        fig.savefig(path[0:-3] + "eps", bbox_inches="tight", format="eps")
+        if eps_format:
+            fig.savefig(path[0:-3] + "eps", bbox_inches="tight", format="eps")
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -189,7 +195,8 @@ def sr_bar(portfolio_list, names, colors, path=None):
 
     if path is not None:
         fig.savefig(path, bbox_inches="tight")
-        fig.savefig(path[0:-3] + "eps", bbox_inches="tight", format="eps")
+        if eps_format:
+            fig.savefig(path[0:-3] + "eps", bbox_inches="tight", format="eps")
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -249,7 +256,8 @@ def learn_plot(trained_vals, colors, marker, delta_mark, path=None):
 
     if path is not None:
         fig.savefig(path, bbox_inches="tight")
-        fig.savefig(path[0:-3] + "eps", bbox_inches="tight", format="eps")
+        # if you want to save in eps format, eps is a format that is used in latex
+        # fig.savefig(path[0:-3] + "eps", bbox_inches="tight", format="eps")
 
 
 ####################################################################################################
@@ -322,13 +330,13 @@ if __name__ == "__main__":
     colors = ["blue", "green", "red"]
 
     # Test wealth_plot
-    wealth_plot(portfolios, names, colors)
+    wealth_plot(portfolios, names, colors, path="wealth_plot_test.pdf")
 
     # Test sr_plot
-    sr_plot(portfolios, names, colors)
+    sr_plot(portfolios, names, colors, path="sr_plot_test.pdf")
 
     # Test sr_bar
-    sr_bar(portfolios, names, colors)
+    sr_bar(portfolios, names, colors, path="sr_bar_test.pdf")
 
     # Test fin_table
     table = fin_table(portfolios, names)

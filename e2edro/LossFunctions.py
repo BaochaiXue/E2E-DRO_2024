@@ -5,6 +5,7 @@
 ####################################################################################################
 import torch
 
+
 ####################################################################################################
 # Performance loss functions
 ####################################################################################################
@@ -19,10 +20,11 @@ def single_period_loss(z_star, y_perf):
     y_perf: Realizations. (perf_period x n_y) tensor of realized values.
 
     Output
-    loss: realized return at time 't' 
+    loss: realized return at time 't'
     """
-    loss = -y_perf[0] @ z_star 
+    loss = -y_perf[0] @ z_star
     return loss
+
 
 def single_period_over_var_loss(z_star, y_perf):
     """Loss function based on the out-of-sample portfolio return over volatility
@@ -39,6 +41,7 @@ def single_period_over_var_loss(z_star, y_perf):
     """
     loss = -y_perf[0] @ z_star / torch.std(y_perf @ z_star)
     return loss
+
 
 def sharpe_loss(z_star, y_perf):
     """Loss function based on the out-of-sample Sharpe ratio

@@ -90,7 +90,7 @@ dr_layer = "hellinger"
 lr_list = [0.005]
 
 # List of total no. of epochs to test
-epoch_list = [1]
+epoch_list = [5]
 
 # For replicability, set the random seed for the numerical experiments
 set_seed = 1000
@@ -353,6 +353,28 @@ else:
         pickle.dump(dr_net_learn_theta, outp, pickle.HIGHEST_PROTOCOL)
     print("dr_net_learn_theta run complete")
 
+    # Exp 5: DR E2E (learn gamma, delta, fixed theta)
+    dr_net_learn_gamma_delta = e2e.e2e_net(
+        n_x,
+        n_y,
+        n_obs,
+        prisk=prisk,
+        train_pred=False,
+        train_gamma=True,
+        train_delta=True,
+        set_seed=set_seed,
+        opt_layer=dr_layer,
+        perf_loss=perf_loss,
+        cache_path=cache_path,
+        perf_period=perf_period,
+        pred_loss_factor=pred_loss_factor,
+    ).double()
+    dr_net_learn_gamma_delta.net_cv(X, Y, lr_list, epoch_list)
+    dr_net_learn_gamma_delta.net_roll_test(X, Y)
+    with open(cache_path + "dr_net_learn_gamma_delta.pkl", "wb") as outp:
+        pickle.dump(dr_net_learn_gamma_delta, outp, pickle.HIGHEST_PROTOCOL)
+    print("dr_net_learn_gamma_delta run complete")
+
 ####################################################################################################
 # Merge objects with their extended-epoch counterparts
 ####################################################################################################
@@ -398,9 +420,7 @@ exp1_validation_table = pd.concat(
     ),
     axis=1,
 )
-exp1_validation_table.set_axis(
-    ["eta", "Epochs", "Base", "Nom.", "DR"], axis=1, inplace=True
-)
+exp1_validation_table.set_axis(["eta", "Epochs", "Base", "Nom.", "DR"], axis=1)
 
 plt.rcParams["text.usetex"] = True
 portfolio_names = [r"EW", r"PO", r"Base", r"Nominal", r"DR"]
@@ -458,9 +478,7 @@ dr_net_learn_delta.cv_results = dr_net_learn_delta.cv_results.sort_values(
     ["epochs", "lr"], ascending=[True, True]
 ).reset_index(drop=True)
 exp2_validation_table = dr_net_learn_delta.cv_results.round(4)
-exp2_validation_table.set_axis(
-    ["eta", "Epochs", "DR (learn delta)"], axis=1, inplace=True
-)
+exp2_validation_table.set_axis(["eta", "Epochs", "DR (learn delta)"], axis=1)
 
 plt.rcParams["text.usetex"] = True
 portfolio_names = [r"PO", r"DR", r"DR (learn $\delta$)"]
@@ -530,7 +548,6 @@ exp3_validation_table.set_axis(
         "DR (learn gamma + delta)",
     ],
     axis=1,
-    inplace=True,
 )
 
 plt.rcParams["text.usetex"] = True
@@ -602,9 +619,7 @@ exp4_validation_table = pd.concat(
     ),
     axis=1,
 )
-exp4_validation_table.set_axis(
-    ["eta", "Epochs", "Base", "Nom.", "DR"], axis=1, inplace=True
-)
+exp4_validation_table.set_axis(["eta", "Epochs", "Base", "Nom.", "DR"], axis=1)
 
 plt.rcParams["text.usetex"] = True
 portfolio_names = [r"PO", r"Base", r"Nominal", r"DR"]
@@ -688,7 +703,6 @@ validation_table.set_axis(
         "DR (theta)",
     ],
     axis=1,
-    inplace=True,
 )
 
 ####################################################################################################
@@ -735,13 +749,13 @@ dr_layer = "hellinger"
 train_pred = True
 
 # List of learning rates to test
-lr_list = [0.005, 0.0125, 0.02]
+lr_list = [0.005]
 
 # List of total no. of epochs to test
-epoch_list = [20, 40, 60]
+epoch_list = [5]
 
 # Load saved models (default is False)
-use_cache = True
+use_cache = False
 
 # ---------------------------------------------------------------------------------------------------
 # Run
@@ -940,7 +954,6 @@ exp5_validation_table.set_axis(
         "DR (3-layer)",
     ],
     axis=1,
-    inplace=True,
 )
 
 plt.rcParams["text.usetex"] = True

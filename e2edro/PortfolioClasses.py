@@ -9,12 +9,13 @@ import torch
 from torch.utils.data import Dataset
 from torch.autograd import Variable
 
+
 ####################################################################################################
 # SlidingWindow torch Dataset to index data to use a sliding window
 ####################################################################################################
 class SlidingWindow(Dataset):
-    """Sliding window dataset constructor
-    """
+    """Sliding window dataset constructor"""
+
     def __init__(self, X, Y, n_obs, perf_period):
         """Construct a sliding (i.e., rolling) window dataset from a complete timeseries dataset
 
@@ -41,27 +42,28 @@ class SlidingWindow(Dataset):
         self.perf_period = perf_period
 
     def __getitem__(self, index):
-        x = self.X[index:index+self.n_obs+1]
-        y = self.Y[index:index+self.n_obs]
-        y_perf = self.Y[index+self.n_obs : index+self.n_obs+self.perf_period+1]
+        x = self.X[index : index + self.n_obs + 1]
+        y = self.Y[index : index + self.n_obs]
+        y_perf = self.Y[index + self.n_obs : index + self.n_obs + self.perf_period + 1]
         return (x, y, y_perf)
 
     def __len__(self):
         return len(self.X) - self.n_obs - self.perf_period
 
+
 ####################################################################################################
 # Backtest object to store out-of-sample results
 ####################################################################################################
 class backtest:
-    """backtest object
-    """
+    """backtest object"""
+
     def __init__(self, len_test, n_y, dates):
         """Portfolio object. Stores the NN out-of-sample results
 
         Inputs
         len_test: Number of scenarios in the out-of-sample evaluation period
         n_y: Number of assets in the portfolio
-        dates: DatetimeIndex 
+        dates: DatetimeIndex
 
         Output
         Backtest object with fields:
@@ -78,18 +80,19 @@ class backtest:
 
     def stats(self):
         tri = np.cumprod(self.rets + 1)
-        self.mean = (tri[-1])**(1/len(tri)) - 1
+        self.mean = (tri[-1]) ** (1 / len(tri)) - 1
         self.vol = np.std(self.rets)
         self.sharpe = self.mean / self.vol
-        self.rets = pd.DataFrame({'Date':self.dates, 'rets': self.rets, 'tri': tri})
-        self.rets = self.rets.set_index('Date')
+        self.rets = pd.DataFrame({"Date": self.dates, "rets": self.rets, "tri": tri})
+        self.rets = self.rets.set_index("Date")
+
 
 ####################################################################################################
 # InSample object to store in-sample results
 ####################################################################################################
 class InSample:
-    """InSample object
-    """
+    """InSample object"""
+
     def __init__(self):
         """Portfolio object. Stores the NN in-sample results
 
@@ -106,27 +109,34 @@ class InSample:
         self.val_loss = []
 
     def df(self):
-        """Return a pandas dataframe object by merging the self.lists
-        """
+        """Return a pandas dataframe object by merging the self.lists"""
         if not self.delta and not self.val_loss:
-            return pd.DataFrame(list(zip(self.loss, self.gamma)), columns=['loss', 'gamma'])
+            return pd.DataFrame(
+                list(zip(self.loss, self.gamma)), columns=["loss", "gamma"]
+            )
         elif not self.delta:
-            return pd.DataFrame(list(zip(self.loss, self.val_loss, self.gamma)), 
-                            columns=['loss', 'val_loss', 'gamma'])
+            return pd.DataFrame(
+                list(zip(self.loss, self.val_loss, self.gamma)),
+                columns=["loss", "val_loss", "gamma"],
+            )
         elif not self.val_loss:
-            return pd.DataFrame(list(zip(self.loss, self.gamma, self.delta)), 
-                            columns=['loss', 'gamma', 'delta'])
+            return pd.DataFrame(
+                list(zip(self.loss, self.gamma, self.delta)),
+                columns=["loss", "gamma", "delta"],
+            )
         else:
-            return pd.DataFrame(list(zip(self.loss, self.val_loss, self.gamma, self.delta)), 
-                            columns=['loss', 'val_loss', 'gamma', 'delta'])
+            return pd.DataFrame(
+                list(zip(self.loss, self.val_loss, self.gamma, self.delta)),
+                columns=["loss", "val_loss", "gamma", "delta"],
+            )
 
 
 ####################################################################################################
 # Backtest object to store out-of-sample results
 ####################################################################################################
 class CrossVal:
-    """Portfolio object
-    """
+    """Portfolio object"""
+
     def __init__(self):
         """CrossVal object. Stores the NN in-sample cross validation results
 
@@ -142,8 +152,8 @@ class CrossVal:
         self.val_loss = []
 
     def df(self):
-        """Return a pandas dataframe object by merging the self.lists
-        """
-        return pd.DataFrame(list(zip(self.lr, self.epochs, self.val_loss)), 
-                            columns=['lr', 'epochs', 'val_loss'])
-
+        """Return a pandas dataframe object by merging the self.lists"""
+        return pd.DataFrame(
+            list(zip(self.lr, self.epochs, self.val_loss)),
+            columns=["lr", "epochs", "val_loss"],
+        )
