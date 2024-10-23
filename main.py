@@ -3,15 +3,15 @@
 ####################################################################################################
 # Import libraries
 ####################################################################################################
+import pickle
+import torch
+import pandas as pd
+import matplotlib.pyplot as plt
 from e2edro import PlotFunctions as pf
 from e2edro import BaseModels as bm
 from e2edro import DataLoad as dl
 from e2edro import e2edro as e2e
-import torch
-import pandas as pd
-import numpy as np
-import pickle
-import matplotlib.pyplot as plt
+
 
 plt.close("all")
 
@@ -44,7 +44,7 @@ n_y = 20
 # AlphaVantage API Key.
 # Note: User API keys can be obtained for free from www.alphavantage.co. Users will need a free
 # academic or paid license to download adjusted closing pricing data from AlphaVantage.
-AV_key = "YDNA9HH8P2IW985M"
+AV_key = None
 
 # Historical data: Download data (or load cached data)
 X, Y = dl.AV(
@@ -163,8 +163,7 @@ else:
     print("ew_net run complete")
 
     # Exp 1, 2, 3: Predict-then-optimize system
-    po_net = bm.pred_then_opt(
-        n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk).double()
+    po_net = bm.pred_then_opt(n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk).double()
     po_net.net_roll_test(X, Y)
     with open(cache_path + "po_net.pkl", "wb") as outp:
         pickle.dump(po_net, outp, pickle.HIGHEST_PROTOCOL)
@@ -377,29 +376,32 @@ else:
     print("dr_net_learn_gamma_delta run complete")
 
 ####################################################################################################
-# Merge objects with their extended-epoch counterparts
+# Merge objects with their extended-epoch counterparts,but we do have this part of the code to train
+# the models for more epochs if needed.
 ####################################################################################################
-if use_cache:
-    portfolios = [
-        "base_net",
-        "nom_net",
-        "dr_net",
-        "dr_net_learn_delta",
-        "nom_net_learn_gamma",
-        "dr_net_learn_gamma",
-        "nom_net_learn_theta",
-        "dr_net_learn_theta",
-    ]
 
-    for portfolio in portfolios:
-        cv_combo = pd.concat(
-            [eval(portfolio).cv_results, eval(portfolio + "_ext").cv_results],
-            ignore_index=True,
-        )
-        eval(portfolio).load_cv_results(cv_combo)
-        if eval(portfolio).epochs > 50:
-            exec(portfolio + "=" + portfolio + "_ext")
-            eval(portfolio).load_cv_results(cv_combo)
+# if use_cache:
+#     portfolios = [
+#         "base_net",
+#         "nom_net",
+#         "dr_net",
+#         "dr_net_learn_delta",
+#         "nom_net_learn_gamma",
+#         "dr_net_learn_gamma",
+#         "nom_net_learn_theta",
+#         "dr_net_learn_theta",
+#     ]
+
+#     for portfolio in portfolios:
+#         cv_combo = pd.concat(
+#             [eval(portfolio).cv_results, eval(portfolio + "_ext").cv_results],
+#             ignore_index=True,
+#         )
+#         eval(portfolio).load_cv_results(cv_combo)
+#         if eval(portfolio).epochs > 50:
+#             exec(portfolio + "=" + portfolio + "_ext")
+#             eval(portfolio).load_cv_results(cv_combo)
+
 
 ####################################################################################################
 # Numerical results
@@ -437,8 +439,7 @@ portfolios = [
 exp1_fin_table = pf.fin_table(portfolios, portfolio_names)
 
 # Wealth evolution plot
-portfolio_colors = ["dimgray", "forestgreen",
-                    "goldenrod", "dodgerblue", "salmon"]
+portfolio_colors = ["dimgray", "forestgreen", "goldenrod", "dodgerblue", "salmon"]
 pf.wealth_plot(
     portfolios,
     portfolio_names,
@@ -484,8 +485,7 @@ exp2_validation_table.set_axis(["eta", "Epochs", "DR (learn delta)"], axis=1)
 
 plt.rcParams["text.usetex"] = True
 portfolio_names = [r"PO", r"DR", r"DR (learn $\delta$)"]
-portfolios = [po_net.portfolio, dr_po_net.portfolio,
-              dr_net_learn_delta.portfolio]
+portfolios = [po_net.portfolio, dr_po_net.portfolio, dr_net_learn_delta.portfolio]
 
 # Out-of-sample summary statistics table
 exp2_fin_table = pf.fin_table(portfolios, portfolio_names)
@@ -600,10 +600,8 @@ exp3_trained_vals = pd.DataFrame(
     zip(
         [nom_net_learn_gamma.gamma_init] + nom_net_learn_gamma.gamma_trained,
         [dr_net_learn_gamma.gamma_init] + dr_net_learn_gamma.gamma_trained,
-        [dr_net_learn_gamma_delta.gamma_init] +
-        dr_net_learn_gamma_delta.gamma_trained,
-        [dr_net_learn_gamma_delta.delta_init] +
-        dr_net_learn_gamma_delta.delta_trained,
+        [dr_net_learn_gamma_delta.gamma_init] + dr_net_learn_gamma_delta.gamma_trained,
+        [dr_net_learn_gamma_delta.delta_init] + dr_net_learn_gamma_delta.delta_trained,
     ),
     columns=["Nom. gamma", "DR gamma", "DR gamma 2", "DR delta"],
 )
@@ -731,8 +729,7 @@ n_x, n_y = 5, 10
 n_obs, n_tot = 100, 1200
 
 # Synthetic data: randomly generate data from a linear model
-X, Y = dl.synthetic_exp(n_x=n_x, n_y=n_y, n_obs=n_obs,
-                        n_tot=n_tot, split=split)
+X, Y = dl.synthetic_exp(n_x=n_x, n_y=n_y, n_obs=n_obs, n_tot=n_tot, split=split)
 
 # ---------------------------------------------------------------------------------------------------
 # Experiment 5: Initialize parameters
