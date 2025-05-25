@@ -4,7 +4,7 @@ import pandas as pd
 import yfinance as yf
 
 
-def robust_download(tickers, start, end, max_retries=3, pause=1.0):
+def robust_download(tickers, start, end, *, max_retries=3, pause=1.0):
     """Download OHLC data via ``yfinance`` with retries and serial requests.
 
     Parameters
@@ -24,18 +24,18 @@ def robust_download(tickers, start, end, max_retries=3, pause=1.0):
     -------
     pd.DataFrame
         DataFrame of adjusted close prices for all successfully downloaded
-        tickers. Tickers that still fail after ``max_retries`` will be
-        missing from the returned frame.
+        tickers. Columns are always the ticker symbols. Tickers that still
+        fail after ``max_retries`` will be missing from the returned frame.
     """
 
-    remaining = list(tickers)
-    collected = []
+    remaining: list[str] = list(tickers)
+    collected: list[pd.DataFrame] = []
 
     for attempt in range(1, max_retries + 1):
         if not remaining:
             break
 
-        df = yf.download(
+        raw = yf.download(
             remaining,
             start=start,
             end=end,
@@ -46,13 +46,19 @@ def robust_download(tickers, start, end, max_retries=3, pause=1.0):
             repair=True,
         )
 
-        if isinstance(df.columns, pd.MultiIndex):
-            df = df["Adj Close"]
+        if isinstance(raw.columns, pd.MultiIndex):
+            if "Adj Close" in raw.columns.get_level_values(0):
+                prices = raw.xs("Adj Close", level=0, axis=1)
+            else:
+                prices = raw.xs("Adj Close", level=1, axis=1)
+        else:
+            prices = raw[["Adj Close"]] if "Adj Close" in raw else raw
+            prices.columns = [remaining[0]]
 
-        good = [t for t in remaining if t in df.columns and not df[t].isna().all()]
+        good = [t for t in remaining if t in prices and not prices[t].isna().all()]
         bad = [t for t in remaining if t not in good]
 
-        collected.append(df[good])
+        collected.append(prices[good])
         remaining = bad
 
         if remaining:
