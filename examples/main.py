@@ -18,7 +18,6 @@ if PROJECT_ROOT not in sys.path:
 from e2edro import PlotFunctions as pf
 from e2edro import BaseModels as bm
 from e2edro import DataLoad as dl
-from e2edro import e2edro as e2e
 
 
 plt.close("all")
@@ -162,6 +161,10 @@ if use_cache:
     with open(cache_path + "dr_net_tv_learn_theta.pkl", "rb") as inp:
         dr_net_tv_learn_theta = pickle.load(inp)
 else:
+    # Import here to avoid importing heavy dependencies when using only the
+    # equal-weight example. ``e2edro`` requires ``cvxpylayers`` and ``diffcp``.
+    from e2edro import e2edro as e2e
+
     # Exp 1: Equal weight portfolio
     ew_net = bm.equal_weight(n_x, n_y, n_obs)
     ew_net.net_roll_test(X, Y, n_roll=4)
@@ -784,6 +787,9 @@ if use_cache:
     with open(cache_path_exp5 + "dr_net_3layer.pkl", "rb") as inp:
         dr_net_3layer = pickle.load(inp)
 else:
+
+    # Import heavy dependencies only when running the synthetic examples that rely on the differentiable optimization layers.
+    from e2edro import e2edro as e2e
 
     # ***********************************************************************************************
     # Linear models
