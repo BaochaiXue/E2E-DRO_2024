@@ -484,8 +484,15 @@ def statanalysis(X: pd.DataFrame, Y: pd.DataFrame) -> pd.DataFrame:
     stats = pd.DataFrame(columns=X.columns, index=Y.columns)
     for ticker in Y.columns:
         for feature in X.columns:
+            # Align the feature and target by index and remove missing values to
+            # avoid shape mismatches when constructing the design matrices.
+            xy = pd.concat([X[feature], Y[ticker]], axis=1, join="inner").dropna()
+            if xy.empty:
+                stats.loc[ticker, feature] = np.nan
+                continue
+
             stats.loc[ticker, feature] = (
-                sm.OLS(Y[ticker].values, sm.add_constant(X[feature]).values)
+                sm.OLS(xy[ticker].values, sm.add_constant(xy[feature]).values)
                 .fit()
                 .pvalues[1]
             )
