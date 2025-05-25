@@ -12,6 +12,8 @@ import yfinance as yf
 import statsmodels.api as sm
 import os
 
+from .utils import robust_download
+
 
 ####################################################################################################
 # TrainTest class
@@ -414,42 +416,32 @@ def AV(
         if n_y is not None:
             tick_list = tick_list[:n_y]
 
-        # Download asset data using yfinance
-        Y = yf.download(
-            tick_list,
-            start="1999-01-01",
-            end=end,
-            progress=False,
-        )["Adj Close"]
-
-        Y = Y["1999-1-1":end].pct_change()
-        Y = Y[start:end]
-        Y.columns = tick_list
+        # Download asset data using yfinance with retry logic
+        Y = robust_download(tick_list, start=start, end=end)
+        Y = Y.pct_change().loc[start:end]
 
         # Download factor data
-        dl_freq = "_daily"
-        X = pdr.get_data_famafrench(
-            "F-F_Research_Data_5_Factors_2x3" + dl_freq, start=start, end=end
+        ff_daily = pdr.get_data_famafrench(
+            "F-F_Research_Data_Factors_daily", start=start, end=end
         )[0]
-        rf_df = X["RF"]
-        X = X.drop(["RF"], axis=1)
+        rf_df = ff_daily.pop("RF") / 100
         mom_df = pdr.get_data_famafrench(
-            "F-F_Momentum_Factor" + dl_freq, start=start, end=end
-        )[0]
+            "F-F_Momentum_Factor_daily", start=start, end=end
+        )[0] / 100
         st_df = pdr.get_data_famafrench(
-            "F-F_ST_Reversal_Factor" + dl_freq, start=start, end=end
-        )[0]
+            "F-F_ST_Reversal_Factor_daily", start=start, end=end
+        )[0] / 100
         lt_df = pdr.get_data_famafrench(
-            "F-F_LT_Reversal_Factor" + dl_freq, start=start, end=end
-        )[0]
+            "F-F_LT_Reversal_Factor_daily", start=start, end=end
+        )[0] / 100
 
         # Concatenate factors as a pandas dataframe
-        X = pd.concat([X, mom_df, st_df, lt_df], axis=1) / 100
+        X = pd.concat([ff_daily / 100, mom_df, st_df, lt_df], axis=1)
 
         if freq == "weekly" or freq == "_weekly":
             # Convert daily returns to weekly returns
-            Y = Y.resample("W-FRI").agg(lambda x: (x + 1).prod() - 1)
-            X = X.resample("W-FRI").agg(lambda x: (x + 1).prod() - 1)
+            Y = Y.resample("W-FRI").apply(lambda s: (s + 1).prod() - 1)
+            X = X.resample("W-FRI").apply(lambda s: (s + 1).prod() - 1)
 
         if save_results:
             X.to_pickle(os.path.join(cache_dir, f"factor_{freq}.pkl"))
