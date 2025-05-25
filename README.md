@@ -66,9 +66,10 @@ installing the dependencies you can execute it with:
 python examples/main.py
 ```
 
-The script caches downloaded data and intermediate results in the `cache/`
-directory. If the folder does not already exist it will be created
-automatically when running the loader.
+The script caches downloaded data and intermediate results in the
+`cache/exp/` directory (and `cache/exp5/` for the synthetic-data example).
+These folders are created automatically when running the loader so no manual
+setup is required.
 
 ## Testing
 
