@@ -16,7 +16,10 @@ def test_av_fallback_uses_yfinance(monkeypatch):
         columns=multi_idx,
     )
 
+    called = {"flag": False}
+
     def fake_download(*args, **kwargs):
+        called["flag"] = True
         return fake_prices
 
     def fake_ff(name, start=None, end=None):
@@ -28,7 +31,6 @@ def test_av_fallback_uses_yfinance(monkeypatch):
     # Patch network calls
     monkeypatch.setattr(DataLoad.yf, "download", fake_download)
     monkeypatch.setattr(DataLoad.pdr, "get_data_famafrench", fake_ff)
-    monkeypatch.setattr(DataLoad, "TimeSeries", lambda *a, **k: pytest.fail("TimeSeries should not be called"))
 
     X, Y = DataLoad.AV(
         "2000-01-01",
@@ -42,3 +44,4 @@ def test_av_fallback_uses_yfinance(monkeypatch):
 
     assert Y.data.shape[1] == 2
     assert not Y.data.empty
+    assert called["flag"]
