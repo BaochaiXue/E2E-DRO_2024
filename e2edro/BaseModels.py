@@ -10,7 +10,14 @@ from torch.utils.data import DataLoader
 
 from . import RiskFunctions as rf
 from . import PortfolioClasses as pc
-from . import e2edro as e2e
+
+# ``e2edro`` pulls in ``cvxpylayers`` which depends on the optional
+# ``diffcp`` package. Importing it unconditionally prevents using the
+# simpler models (e.g. ``equal_weight``) on systems where ``diffcp`` is
+# not installed.  To allow these models to run without the optional
+# dependency we defer importing ``e2edro`` until it is actually needed
+# (in ``pred_then_opt``).
+
 
 
 ####################################################################################################
@@ -74,6 +81,11 @@ class pred_then_opt(nn.Module):
         self.pred_layer.bias.requires_grad = False
 
         # LAYER: Optimization
+        # ``e2edro`` (and by extension ``cvxpylayers``) is only required when
+        # constructing the optimization layer. Import here to avoid importing it
+        # when using simpler models that do not rely on these packages.
+        from . import e2edro as e2e
+
         self.opt_layer = e2e.OPT_LAYER_MAP[opt_layer](n_y, n_obs, e2e.RISK_FUNC_MAP[prisk])
         # self.opt_layer = e2e.nominal(n_y, n_obs, eval('rf.'+prisk))
 

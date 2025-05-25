@@ -41,7 +41,7 @@ Ensure you have the following dependencies installed. Versions have been updated
 - **Matplotlib**: `>=3.6.0`
 - **cvxpy**: `>=1.3.0`
 - **cvxpylayers**: `>=0.1.7`
-- **diffcp**: `>=1.0.15`
+- **diffcp**: `>=1.0.15` *(required only for models that use the differentiable optimization layers)*
 - **PyTorch**: `>=2.0.0`
 - **pandas_datareader**: `>=0.10.0`
 - **yfinance**: `>=0.2.0`
