@@ -45,6 +45,34 @@ Ensure you have the following dependencies installed. Versions have been updated
 - **pandas_datareader**: `>=0.10.0`
 - **alpha_vantage**: `>=2.3.0`
 
+## Installation
+
+Create a virtual environment and install the dependencies listed in
+`requirements.txt`:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+## Running the Example
+
+An example experiment script is available in `examples/main.py`. After
+installing the dependencies you can execute it with:
+
+```bash
+python examples/main.py
+```
+
+## Testing
+
+Basic tests are provided using `pytest`:
+
+```bash
+pytest
+```
+
 
 ## Acknowledgments
 

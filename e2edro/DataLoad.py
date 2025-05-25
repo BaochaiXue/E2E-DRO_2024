@@ -265,7 +265,39 @@ class synthetic3layer(nn.Module):
 ####################################################################################################
 # Synthetic data with Gaussian and exponential noise terms
 ####################################################################################################
-def synthetic_exp(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=123):
+def synthetic_exp(
+    n_x: int = 5,
+    n_y: int = 10,
+    n_tot: int = 1200,
+    n_obs: int = 104,
+    split: list[float] | None = None,
+    set_seed: int = 123,
+) -> tuple[TrainTest, TrainTest]:
+    """Generate a synthetic dataset with Gaussian and exponential noise.
+
+    Parameters
+    ----------
+    n_x : int, optional
+        Number of features, by default 5.
+    n_y : int, optional
+        Number of assets, by default 10.
+    n_tot : int, optional
+        Total number of observations, by default 1200.
+    n_obs : int, optional
+        Window length for the sliding datasets, by default 104.
+    split : list[float], optional
+        Train-test split fractions, by default ``[0.6, 0.4]``.
+    set_seed : int, optional
+        Random seed for reproducibility, by default 123.
+
+    Returns
+    -------
+    tuple[TrainTest, TrainTest]
+        Pair of ``TrainTest`` objects for features ``X`` and targets ``Y``.
+    """
+
+    if split is None:
+        split = [0.6, 0.4]
 
     np.random.seed(set_seed)
 
