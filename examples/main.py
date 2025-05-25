@@ -29,6 +29,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Path to cache the data, models and results
 cache_path = "./cache/exp/"
+# Ensure the cache directories exist so saving results does not fail
+os.makedirs(cache_path, exist_ok=True)
+os.makedirs(os.path.join(cache_path, "plots"), exist_ok=True)
 
 ####################################################################################################
 # Experiments 1-4 (with hisotrical data): Load data
@@ -724,6 +727,9 @@ validation_table.set_axis(
 
 # Path to cache the data, models and results
 cache_path_exp5 = "./cache/exp5/"
+# Ensure cache directories for experiment 5 also exist
+os.makedirs(cache_path_exp5, exist_ok=True)
+os.makedirs(os.path.join(cache_path_exp5, "plots"), exist_ok=True)
 
 # ---------------------------------------------------------------------------------------------------
 # Experiment 5: Load data
