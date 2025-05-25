@@ -1,0 +1,219 @@
+\begin{thebibliography}{}
+
+\bibitem[Agrawal et~al., 2019]{agrawal2019differentiable}
+Agrawal, A., Amos, B., Barratt, S., Boyd, S., Diamond, S., and Kolter, J.~Z.
+  (2019).
+\newblock Differentiable convex optimization layers.
+\newblock {\em Advances in Neural Information Processing Systems},
+  32:9562--9574.
+
+\bibitem[Amos, 2019]{amos2019differentiable}
+Amos, B. (2019).
+\newblock {\em Differentiable optimization-based modeling for machine
+  learning}.
+\newblock PhD thesis, PhD thesis. Carnegie Mellon University.
+
+\bibitem[Amos and Kolter, 2017]{amos2017optnet}
+Amos, B. and Kolter, J.~Z. (2017).
+\newblock Optnet: Differentiable optimization as a layer in neural networks.
+\newblock In {\em International Conference on Machine Learning}, pages
+  136--145. PMLR.
+
+\bibitem[Amos et~al., 2018]{amos2018differentiable}
+Amos, B., Rodriguez, I. D.~J., Sacks, J., Boots, B., and Kolter, J.~Z. (2018).
+\newblock Differentiable mpc for end-to-end planning and control.
+\newblock In {\em Proceedings of the 32nd International Conference on Neural
+  Information Processing Systems}, pages 8299--8310.
+
+\bibitem[Ben-Tal et~al., 2013]{ben2013robust}
+Ben-Tal, A., Den~Hertog, D., De~Waegenaere, A., Melenberg, B., and Rennen, G.
+  (2013).
+\newblock Robust solutions of optimization problems affected by uncertain
+  probabilities.
+\newblock {\em Management Science}, 59(2):341--357.
+
+\bibitem[Bengio, 1997]{bengio1997using}
+Bengio, Y. (1997).
+\newblock Using a financial training criterion rather than a prediction
+  criterion.
+\newblock {\em International Journal of Neural Systems}, 8(04):433--443.
+
+\bibitem[Bertsimas et~al., 2018]{bertsimas2018data}
+Bertsimas, D., Gupta, V., and Kallus, N. (2018).
+\newblock Data-driven robust optimization.
+\newblock {\em Mathematical Programming}, 167(2):235--292.
+
+\bibitem[Best and Grauer, 1991]{best1991sensitivity}
+Best, M.~J. and Grauer, R.~R. (1991).
+\newblock On the sensitivity of mean-variance-efficient portfolios to changes
+  in asset means: some analytical and computational results.
+\newblock {\em The review of financial studies}, 4(2):315--342.
+
+\bibitem[Boyd and Vandenberghe, 2004]{boyd2004convex}
+Boyd, S. and Vandenberghe, L. (2004).
+\newblock {\em Convex optimization}.
+\newblock Cambridge university press.
+
+\bibitem[Broadie, 1993]{broadie1993computing}
+Broadie, M. (1993).
+\newblock Computing efficient frontiers using estimated parameters.
+\newblock {\em Annals of Operations Research}, 45(1):21--58.
+
+\bibitem[Butler and Kwon, 2021]{butler2021integrating}
+Butler, A. and Kwon, R.~H. (2021).
+\newblock Integrating prediction in mean-variance portfolio optimization.
+
+\bibitem[Calafiore, 2007]{calafiore2007ambiguous}
+Calafiore, G.~C. (2007).
+\newblock Ambiguous risk measures and optimal robust portfolios.
+\newblock {\em SIAM Journal on Optimization}, 18(3):853--877.
+
+\bibitem[Chopra and Ziemba, 1993]{chopra1993}
+Chopra, V.~K. and Ziemba, W.~T. (1993).
+\newblock The effect of errors in means, variances, and covariances on optimal
+  portfolio choice.
+\newblock {\em Journal of Portfolio Management}, pages 6--11.
+
+\bibitem[Costa and Kwon, 2020]{costa2020robust}
+Costa, G. and Kwon, R.~H. (2020).
+\newblock A robust framework for risk parity portfolios.
+\newblock {\em Journal of Asset Management}, 21:447--466.
+
+\bibitem[Costa and Kwon, 2021]{costa2021datadriven}
+Costa, G. and Kwon, R.~H. (2021).
+\newblock Data-driven distributionally robust risk parity portfolio
+  optimization.
+\newblock {\em arXiv preprint arXiv:2110.06464}.
+
+\bibitem[Delage and Ye, 2010]{delage2010distributionally}
+Delage, E. and Ye, Y. (2010).
+\newblock Distributionally robust optimization under moment uncertainty with
+  application to data-driven problems.
+\newblock {\em Operations Research}, 58(3):595--612.
+
+\bibitem[DeMiguel et~al., 2009]{demiguel2009optimal}
+DeMiguel, V., Garlappi, L., and Uppal, R. (2009).
+\newblock Optimal versus naive diversification: How inefficient is the 1/n
+  portfolio strategy?
+\newblock {\em The review of Financial studies}, 22(5):1915--1953.
+
+\bibitem[Domahidi et~al., 2013]{domahidi2013ecos}
+Domahidi, A., Chu, E., and Boyd, S. (2013).
+\newblock {ECOS}: {A}n {SOCP} solver for embedded systems.
+\newblock In {\em European Control Conference (ECC)}, pages 3071--3076.
+
+\bibitem[Donti et~al., 2017]{donti2017task}
+Donti, P.~L., Amos, B., and Kolter, J.~Z. (2017).
+\newblock Task-based end-to-end model learning in stochastic optimization.
+\newblock In {\em Proceedings of the 31st International Conference on Neural
+  Information Processing Systems}, pages 5490--5500.
+
+\bibitem[Elmachtoub et~al., 2020]{elmachtoub2020decision}
+Elmachtoub, A., Liang, J. C.~N., and McNellis, R. (2020).
+\newblock Decision trees for decision-making under the predict-then-optimize
+  framework.
+\newblock In {\em International Conference on Machine Learning}, pages
+  2858--2867. PMLR.
+
+\bibitem[Elmachtoub and Grigas, 2021]{elmachtoub2021smart}
+Elmachtoub, A.~N. and Grigas, P. (2021).
+\newblock Smart ``predict, then optimize''.
+\newblock {\em Management Science}.
+
+\bibitem[Fabozzi et~al., 2007]{fabozzi2007robust}
+Fabozzi, F.~J., Kolm, P.~N., Pachamanova, D.~A., and Focardi, S.~M. (2007).
+\newblock Robust portfolio optimization.
+\newblock {\em Journal of Portfolio Management}, 33(3):40.
+
+\bibitem[French, 2021]{French2021Data}
+French, K.~R. (2021).
+\newblock Data library.
+\newblock [Online; accessed 10-Dec-2021].
+
+\bibitem[Goldfarb and Iyengar, 2003]{goldfarb2003robust}
+Goldfarb, D. and Iyengar, G. (2003).
+\newblock Robust portfolio selection problems.
+\newblock {\em Mathematics of Operations Research}, 28(1):1--38.
+
+\bibitem[Kannan et~al., 2020]{kannan2020residuals}
+Kannan, R., Bayraksan, G., and Luedtke, J.~R. (2020).
+\newblock Residuals-based distributionally robust optimization with covariate
+  information.
+\newblock {\em arXiv preprint arXiv:2012.01088}.
+
+\bibitem[Kingma and Ba, 2014]{kingma2014adam}
+Kingma, D.~P. and Ba, J. (2014).
+\newblock Adam: {A} method for stochastic optimization.
+\newblock {\em arXiv preprint arXiv:1412.6980}.
+
+\bibitem[LeCun et~al., 2005]{lecun2005off}
+LeCun, Y., Muller, U., Ben, J., Cosatto, E., and Flepp, B. (2005).
+\newblock Off-road obstacle avoidance through end-to-end learning.
+\newblock In {\em Proceedings of the 18th International Conference on Neural
+  Information Processing Systems}, pages 739--746.
+
+\bibitem[Merton, 1980]{merton1980estimating}
+Merton, R.~C. (1980).
+\newblock On estimating the expected return on the market: An exploratory
+  investigation.
+\newblock {\em Journal of financial economics}, 8(4):323--361.
+
+\bibitem[Paszke et~al., 2019]{paszke2019pytorch}
+Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen,
+  T., Lin, Z., Gimelshein, N., Antiga, L., Desmaison, A., Kopf, A., Yang, E.,
+  DeVito, Z., Raison, M., Tejani, A., Chilamkurthy, S., Steiner, B., Fang, L.,
+  Bai, J., and Chintala, S. (2019).
+\newblock Pytorch: An imperative style, high-performance deep learning library.
+\newblock In Wallach, H., Larochelle, H., Beygelzimer, A., d'Alch\'{e} Buc, F.,
+  Fox, E., and Garnett, R., editors, {\em Advances in Neural Information
+  Processing Systems 32}, pages 8024--8035. Curran Associates, Inc.
+
+\bibitem[Rockafellar et~al., 2006]{rockafellar2006generalized}
+Rockafellar, R.~T., Uryasev, S., and Zabarankin, M. (2006).
+\newblock Generalized deviations in risk analysis.
+\newblock {\em Finance and Stochastics}, 10(1):51--74.
+
+\bibitem[Scarf, 1958]{scarf1958min}
+Scarf, H. (1958).
+\newblock A min-max solution of an inventory problem.
+\newblock {\em Studies in the mathematical theory of inventory and production},
+  pages 201--209.
+
+\bibitem[Sharpe, 1994]{sharpe1994sharpe}
+Sharpe, W.~F. (1994).
+\newblock The sharpe ratio.
+\newblock {\em Journal of Portfolio Management}, 21(1):49--58.
+
+\bibitem[Thomas et~al., 2006]{thomas2006cognitive}
+Thomas, R.~W., Friend, D.~H., DaSilva, L.~A., and MacKenzie, A.~B. (2006).
+\newblock Cognitive networks: adaptation and learning to achieve end-to-end
+  performance objectives.
+\newblock {\em IEEE Communications magazine}, 44(12):51--57.
+
+\bibitem[T{\"u}t{\"u}nc{\"u} and Koenig, 2004]{tutuncu2004robust}
+T{\"u}t{\"u}nc{\"u}, R.~H. and Koenig, M. (2004).
+\newblock Robust asset allocation.
+\newblock {\em Annals of Operations Research}, 132(1-4):157--187.
+
+\bibitem[Uysal et~al., 2021]{uysal2021end}
+Uysal, A.~S., Li, X., and Mulvey, J.~M. (2021).
+\newblock End-to-end risk budgeting portfolio optimization with neural
+  networks.
+
+\bibitem[Von~Neumann, 1928]{neumann1928theorie}
+Von~Neumann, J. (1928).
+\newblock Zur theorie der gesellschaftsspiele.
+\newblock {\em Mathematische annalen}, 100(1):295--320.
+
+\bibitem[Zhang et~al., 2021]{zhang2021universal}
+Zhang, C., Zhang, Z., Cucuringu, M., and Zohren, S. (2021).
+\newblock A universal end-to-end approach to portfolio optimization via deep
+  learning.
+\newblock {\em arXiv preprint arXiv:2111.09170}.
+
+\bibitem[Zhang et~al., 2020]{zhang2020deepA}
+Zhang, Z., Zohren, S., and Roberts, S. (2020).
+\newblock Deep learning for portfolio optimization.
+\newblock {\em The Journal of Financial Data Science}, 2(4):8--20.
+
+\end{thebibliography}
