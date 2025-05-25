@@ -1,4 +1,4 @@
-# Forked: Distributionally Robust End-to-End Portfolio Construction
+# Forked: Distributionally Robust End-to-End Portfolio Construction - 2024
 
 Welcome to the forked version of the [Distributionally Robust End-to-End Portfolio Construction](https://arxiv.org/abs/2206.05134) repository. This fork includes modifications to ensure compatibility with **Python 3.12** and **PyTorch 2.x**, enabling improved performance and leveraging the latest features of these platforms.
 
