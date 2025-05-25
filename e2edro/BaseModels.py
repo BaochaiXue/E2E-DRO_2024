@@ -8,9 +8,9 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-import e2edro.RiskFunctions as rf
-import e2edro.PortfolioClasses as pc
-import e2edro.e2edro as e2e
+from . import RiskFunctions as rf
+from . import PortfolioClasses as pc
+from . import e2edro as e2e
 
 
 ####################################################################################################
