@@ -9,6 +9,7 @@ import pandas as pd
 import pandas_datareader as pdr
 import numpy as np
 from alpha_vantage.timeseries import TimeSeries
+import yfinance as yf
 import time
 import statsmodels.api as sm
 
@@ -370,7 +371,8 @@ def AV(
         State whether the data should be cached for future use. . The default is False.
     AV_key : str, optional
         AlphaVantage user key to access their API. Keys are free for academic users. The default
-        is None.
+        is None. When ``None``, asset prices are downloaded using ``yfinance`` instead of
+        ``alpha_vantage``.
 
     Returns
     -------
@@ -411,24 +413,26 @@ def AV(
             tick_list = tick_list[:n_y]
 
         if AV_key is None:
-            print(
-                """A personal AlphaVantage API key is required to load the asset pricing data. 
-                  If you do not have a key, you can get one from www.alphavantage.co (free for 
-                  academic users)"""
-            )
-            AV_key = input("Enter your AlphaVantage API key: ")
+            # Use publicly available data via yfinance when no API key is provided
+            Y = yf.download(
+                tick_list,
+                start="1999-01-01",
+                end=end,
+                progress=False,
+            )["Adj Close"]
+        else:
+            ts = TimeSeries(key=AV_key, output_format="pandas", indexing_type="date")
 
-        ts = TimeSeries(key=AV_key, output_format="pandas", indexing_type="date")
+            # Download asset data from AlphaVantage
+            Y = []
+            for tick in tick_list:
+                data, _ = ts.get_daily_adjusted(symbol=tick, outputsize="full")
+                data = data["5. adjusted close"]
+                Y.append(data)
+                time.sleep(12.5)
+            Y = pd.concat(Y, axis=1)
+            Y = Y[::-1]
 
-        # Download asset data
-        Y = []
-        for tick in tick_list:
-            data, _ = ts.get_daily_adjusted(symbol=tick, outputsize="full")
-            data = data["5. adjusted close"]
-            Y.append(data)
-            time.sleep(12.5)
-        Y = pd.concat(Y, axis=1)
-        Y = Y[::-1]
         Y = Y["1999-1-1":end].pct_change()
         Y = Y[start:end]
         Y.columns = tick_list

@@ -44,6 +44,7 @@ Ensure you have the following dependencies installed. Versions have been updated
 - **PyTorch**: `>=2.0.0`
 - **pandas_datareader**: `>=0.10.0`
 - **alpha_vantage**: `>=2.3.0`
+- **yfinance**: `>=0.2.0`
 
 ## Installation
 

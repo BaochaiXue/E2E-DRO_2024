@@ -7,5 +7,6 @@ cvxpylayers>=0.1.7
 torch>=2.0
 pandas_datareader>=0.10
 alpha_vantage>=2.3
+yfinance>=0.2
 psutil>=5.9
 statsmodels>=0.14
