@@ -60,7 +60,7 @@ X, Y = dl.AV(
     freq=freq,
     n_obs=n_obs,
     n_y=n_y,
-    use_cache=True,
+    use_cache=False,
     save_results=False,
     AV_key=AV_key,
 )
