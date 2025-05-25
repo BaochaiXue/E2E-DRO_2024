@@ -41,6 +41,7 @@ Ensure you have the following dependencies installed. Versions have been updated
 - **Matplotlib**: `>=3.6.0`
 - **cvxpy**: `>=1.3.0`
 - **cvxpylayers**: `>=0.1.7`
+- **diffcp**: `>=1.0.15`
 - **PyTorch**: `>=2.0.0`
 - **pandas_datareader**: `>=0.10.0`
 - **yfinance**: `>=0.2.0`
@@ -64,6 +65,10 @@ installing the dependencies you can execute it with:
 ```bash
 python examples/main.py
 ```
+
+The script caches downloaded data and intermediate results in the `cache/`
+directory. If the folder does not already exist it will be created
+automatically when running the loader.
 
 ## Testing
 

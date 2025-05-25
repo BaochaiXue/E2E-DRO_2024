@@ -4,6 +4,7 @@ pandas>=1.5
 matplotlib>=3.6
 cvxpy>=1.3
 cvxpylayers>=0.1.7
+diffcp>=1.0.15
 torch>=2.0
 pandas_datareader>=0.10
 yfinance>=0.2

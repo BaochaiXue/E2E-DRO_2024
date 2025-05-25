@@ -10,6 +10,7 @@ import pandas_datareader as pdr
 import numpy as np
 import yfinance as yf
 import statsmodels.api as sm
+import os
 
 
 ####################################################################################################
@@ -379,9 +380,13 @@ def AV(
         TrainTest object with asset data split into train, validation and test subsets.
     """
 
+    cache_dir = os.path.join(".", "cache")
+    if use_cache or save_results:
+        os.makedirs(cache_dir, exist_ok=True)
+
     if use_cache:
-        X = pd.read_pickle("./cache/factor_" + freq + ".pkl")
-        Y = pd.read_pickle("./cache/asset_" + freq + ".pkl")
+        X = pd.read_pickle(os.path.join(cache_dir, f"factor_{freq}.pkl"))
+        Y = pd.read_pickle(os.path.join(cache_dir, f"asset_{freq}.pkl"))
     else:
         tick_list = [
             "AAPL",
@@ -447,8 +452,8 @@ def AV(
             X = X.resample("W-FRI").agg(lambda x: (x + 1).prod() - 1)
 
         if save_results:
-            X.to_pickle("./cache/factor_" + freq + ".pkl")
-            Y.to_pickle("./cache/asset_" + freq + ".pkl")
+            X.to_pickle(os.path.join(cache_dir, f"factor_{freq}.pkl"))
+            Y.to_pickle(os.path.join(cache_dir, f"asset_{freq}.pkl"))
 
     # Partition dataset into training and testing sets. Lag the data by one observation
     return TrainTest(X[:-1], n_obs, split), TrainTest(Y[1:], n_obs, split)
