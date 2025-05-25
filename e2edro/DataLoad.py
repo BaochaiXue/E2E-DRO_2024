@@ -8,9 +8,7 @@ import torch.nn as nn
 import pandas as pd
 import pandas_datareader as pdr
 import numpy as np
-from alpha_vantage.timeseries import TimeSeries
 import yfinance as yf
-import time
 import statsmodels.api as sm
 
 
@@ -332,9 +330,9 @@ def synthetic_exp(
 
 
 ####################################################################################################
-# Option 4: Factors from Kenneth French's data library and asset data from AlphaVantage
+# Option 4: Factors from Kenneth French's data library and asset data from Yahoo Finance
 # https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html
-# https://www.alphavantage.co
+# https://finance.yahoo.com
 ####################################################################################################
 def AV(
     start: str,
@@ -347,7 +345,7 @@ def AV(
     save_results: bool = False,
     AV_key: str = None,
 ):
-    """Load data from Kenneth French's data library and from AlphaVantage
+    """Load data from Kenneth French's data library and from Yahoo Finance
     https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html
     https://www.alphavantage.co
 
@@ -370,9 +368,8 @@ def AV(
     save_results : bool, optional
         State whether the data should be cached for future use. . The default is False.
     AV_key : str, optional
-        AlphaVantage user key to access their API. Keys are free for academic users. The default
-        is None. When ``None``, asset prices are downloaded using ``yfinance`` instead of
-        ``alpha_vantage``.
+        Unused parameter kept for backwards compatibility. Asset prices are
+        always downloaded using ``yfinance``.
 
     Returns
     -------
@@ -412,26 +409,13 @@ def AV(
         if n_y is not None:
             tick_list = tick_list[:n_y]
 
-        if AV_key is None:
-            # Use publicly available data via yfinance when no API key is provided
-            Y = yf.download(
-                tick_list,
-                start="1999-01-01",
-                end=end,
-                progress=False,
-            )["Adj Close"]
-        else:
-            ts = TimeSeries(key=AV_key, output_format="pandas", indexing_type="date")
-
-            # Download asset data from AlphaVantage
-            Y = []
-            for tick in tick_list:
-                data, _ = ts.get_daily_adjusted(symbol=tick, outputsize="full")
-                data = data["5. adjusted close"]
-                Y.append(data)
-                time.sleep(12.5)
-            Y = pd.concat(Y, axis=1)
-            Y = Y[::-1]
+        # Download asset data using yfinance
+        Y = yf.download(
+            tick_list,
+            start="1999-01-01",
+            end=end,
+            progress=False,
+        )["Adj Close"]
 
         Y = Y["1999-1-1":end].pct_change()
         Y = Y[start:end]
