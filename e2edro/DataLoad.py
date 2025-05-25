@@ -455,6 +455,16 @@ def AV(
             X.to_pickle(os.path.join(cache_dir, f"factor_{freq}.pkl"))
             Y.to_pickle(os.path.join(cache_dir, f"asset_{freq}.pkl"))
 
+    if X.empty or Y.empty:
+        raise ValueError(
+            "Downloaded data is empty. Check your network connection or the provided date range."
+        )
+
+    if len(X) <= n_obs or len(Y) <= n_obs:
+        raise ValueError(
+            "Not enough data to create the requested sliding windows; try reducing 'n_obs' or expanding the date range."
+        )
+
     # Partition dataset into training and testing sets. Lag the data by one observation
     return TrainTest(X[:-1], n_obs, split), TrainTest(Y[1:], n_obs, split)
 
