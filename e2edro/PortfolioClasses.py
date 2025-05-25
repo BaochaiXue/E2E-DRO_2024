@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
-from torch.autograd import Variable
 
 
 ####################################################################################################
@@ -36,8 +35,8 @@ class SlidingWindow(Dataset):
         optimization. Therefore, no pair in 'y' is required (it is assumed the pair y_T is not yet
         observable)
         """
-        self.X = Variable(torch.tensor(X.values, dtype=torch.double))
-        self.Y = Variable(torch.tensor(Y.values, dtype=torch.double))
+        self.X = torch.tensor(X.values, dtype=torch.double)
+        self.Y = torch.tensor(Y.values, dtype=torch.double)
         self.n_obs = n_obs
         self.perf_period = perf_period
 

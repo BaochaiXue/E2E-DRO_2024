@@ -7,7 +7,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
 
 import e2edro.RiskFunctions as rf
 import e2edro.PortfolioClasses as pc
@@ -166,8 +165,8 @@ class pred_then_opt(nn.Module):
             X_train, Y_train = X.train(), Y.train()
             X_train.insert(0, "ones", 1.0)
 
-            X_train = Variable(torch.tensor(X_train.values, dtype=torch.double))
-            Y_train = Variable(torch.tensor(Y_train.values, dtype=torch.double))
+            X_train = torch.tensor(X_train.values, dtype=torch.double)
+            Y_train = torch.tensor(Y_train.values, dtype=torch.double)
 
             Theta = torch.inverse(X_train.T @ X_train) @ (X_train.T @ Y_train)
             Theta = Theta.T
@@ -344,8 +343,8 @@ class gamma_range(nn.Module):
         X_train, Y_train = X.train(), Y.train()
         X_train.insert(0, "ones", 1.0)
 
-        X_train = Variable(torch.tensor(X_train.values, dtype=torch.double))
-        Y_train = Variable(torch.tensor(Y_train.values, dtype=torch.double))
+        X_train = torch.tensor(X_train.values, dtype=torch.double)
+        Y_train = torch.tensor(Y_train.values, dtype=torch.double)
 
         Theta = torch.inverse(X_train.T @ X_train) @ (X_train.T @ Y_train)
         Theta = Theta.T

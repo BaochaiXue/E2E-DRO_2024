@@ -17,7 +17,7 @@ import statsmodels.api as sm
 # TrainTest class
 ####################################################################################################
 class TrainTest:
-    def __init__(self, data, n_obs, split):
+    def __init__(self, data: pd.DataFrame, n_obs: int, split: list[float]):
         """Object to hold the training, validation and testing datasets
 
         Inputs
@@ -38,18 +38,18 @@ class TrainTest:
         numel = n_obs_tot * np.cumsum(split)
         self.numel = [round(i) for i in numel]
 
-    def split_update(self, split):
+    def split_update(self, split: list[float]) -> None:
         """Update the list outlining the split ratio of training, validation and testing"""
         self.split = split
         n_obs_tot = self.data.shape[0]
         numel = n_obs_tot * np.cumsum(split)
         self.numel = [round(i) for i in numel]
 
-    def train(self):
+    def train(self) -> pd.DataFrame:
         """Return the training subset of observations"""
         return self.data[: self.numel[0]]
 
-    def test(self):
+    def test(self) -> pd.DataFrame:
         """Return the test subset of observations"""
         return self.data[self.numel[0] - self.n_obs : self.numel[1]]
 
@@ -57,7 +57,14 @@ class TrainTest:
 ####################################################################################################
 # Generate linear synthetic data
 ####################################################################################################
-def synthetic(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=100):
+def synthetic(
+    n_x: int = 5,
+    n_y: int = 10,
+    n_tot: int = 1200,
+    n_obs: int = 104,
+    split: list[float] | None = None,
+    set_seed: int = 100,
+) -> tuple[TrainTest, TrainTest]:
     """Generates synthetic (normally-distributed) asset and factor data
 
     Inputs
@@ -72,6 +79,9 @@ def synthetic(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=1
     X: TrainValTest object with feature data split into train, validation and test subsets
     Y: TrainValTest object with asset data split into train, validation and test subsets
     """
+    if split is None:
+        split = [0.6, 0.4]
+
     np.random.seed(set_seed)
 
     # 'True' prediction bias and weights
@@ -99,7 +109,14 @@ def synthetic(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=1
 ####################################################################################################
 # Generate non-linear synthetic data
 ####################################################################################################
-def synthetic_nl(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=100):
+def synthetic_nl(
+    n_x: int = 5,
+    n_y: int = 10,
+    n_tot: int = 1200,
+    n_obs: int = 104,
+    split: list[float] | None = None,
+    set_seed: int = 100,
+) -> tuple[TrainTest, TrainTest]:
     """Generates synthetic (normally-distributed) factor data and mix them following a quadratic
     model of linear, squared and cross products to produce the asset data.
 
@@ -115,6 +132,9 @@ def synthetic_nl(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_see
     X: TrainValTest object with feature data split into train, validation and test subsets
     Y: TrainValTest object with asset data split into train, validation and test subsets
     """
+    if split is None:
+        split = [0.6, 0.4]
+
     np.random.seed(set_seed)
 
     # 'True' prediction bias and weights
@@ -146,8 +166,13 @@ def synthetic_nl(n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_see
 # Generate non-linear synthetic data
 ####################################################################################################
 def synthetic_NN(
-    n_x=5, n_y=10, n_tot=1200, n_obs=104, split=[0.6, 0.4], set_seed=45678
-):
+    n_x: int = 5,
+    n_y: int = 10,
+    n_tot: int = 1200,
+    n_obs: int = 104,
+    split: list[float] | None = None,
+    set_seed: int = 45678,
+) -> tuple[TrainTest, TrainTest]:
     """Generates synthetic (normally-distributed) factor data and mix them following a
     randomly-initialized 3-layer neural network.
 
@@ -163,6 +188,9 @@ def synthetic_NN(
     X: TrainValTest object with feature data split into train, validation and test subsets
     Y: TrainValTest object with asset data split into train, validation and test subsets
     """
+    if split is None:
+        split = [0.6, 0.4]
+
     np.random.seed(set_seed)
 
     # Syntehtic features
