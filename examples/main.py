@@ -41,9 +41,9 @@ n_obs = 104
 # Number of assets
 n_y = 20
 
-# AlphaVantage API Key.
-# Note: User API keys can be obtained for free from www.alphavantage.co. Users will need a free
-# academic or paid license to download adjusted closing pricing data from AlphaVantage.
+# AlphaVantage API Key (optional).
+# Providing a key downloads prices from AlphaVantage; if left ``None`` the code
+# falls back to ``yfinance`` which does not require registration.
 AV_key = None
 
 # Historical data: Download data (or load cached data)
