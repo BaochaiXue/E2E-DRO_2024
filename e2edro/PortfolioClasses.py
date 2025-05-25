@@ -73,6 +73,12 @@ class backtest:
         vol: Volatility (i.e., standard deviation of the returns) (dim: scalar)
         sharpe: pseudo-Sharpe ratio defined as 'mean / vol' (dim: scalar)
         """
+        if len_test <= 0:
+            raise ValueError(
+                "len_test must be positive; check that the test split contains "
+                "more than 'n_obs' samples"
+            )
+
         self.weights = np.zeros((len_test, n_y))
         self.rets = np.zeros(len_test)
         self.dates = dates[-len_test:]
