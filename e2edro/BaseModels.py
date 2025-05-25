@@ -74,7 +74,7 @@ class pred_then_opt(nn.Module):
         self.pred_layer.bias.requires_grad = False
 
         # LAYER: Optimization
-        self.opt_layer = eval("e2e." + opt_layer)(n_y, n_obs, eval("rf." + prisk))
+        self.opt_layer = e2e.OPT_LAYER_MAP[opt_layer](n_y, n_obs, e2e.RISK_FUNC_MAP[prisk])
         # self.opt_layer = e2e.nominal(n_y, n_obs, eval('rf.'+prisk))
 
     # -----------------------------------------------------------------------------------------------
