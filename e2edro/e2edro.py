@@ -192,7 +192,28 @@ def tv(n_y, n_obs, prisk):
     # Construct optimization problem and differentiable layer
     problem = cp.Problem(objective, constraints)
 
+
     return CvxpyLayer(problem, parameters=[ep, y_hat, gamma, delta], variables=[z])
+
+
+# Mapping dictionaries for string based references
+PERF_LOSS_MAP = {
+    "single_period_loss": lf.single_period_loss,
+    "single_period_over_var_loss": lf.single_period_over_var_loss,
+    "sharpe_loss": lf.sharpe_loss,
+}
+
+RISK_FUNC_MAP = {
+    "p_var": rf.p_var,
+    "p_mad": rf.p_mad,
+}
+
+OPT_LAYER_MAP = {
+    "base_mod": base_mod,
+    "nominal": nominal,
+    "tv": tv,
+    "hellinger": hellinger,
+}
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -335,7 +356,7 @@ class e2e_net(nn.Module):
             self.pred_loss = None
 
         # Define performance loss
-        self.perf_loss = eval("lf." + perf_loss)
+        self.perf_loss = PERF_LOSS_MAP[perf_loss]
 
         # Number of time steps to evaluate the task loss
         self.perf_period = perf_period
@@ -393,7 +414,7 @@ class e2e_net(nn.Module):
             )
 
         # LAYER: Optimization model
-        self.opt_layer = eval(opt_layer)(n_y, n_obs, eval("rf." + prisk))
+        self.opt_layer = OPT_LAYER_MAP[opt_layer](n_y, n_obs, RISK_FUNC_MAP[prisk])
 
         # Store reference path to store model data
         self.cache_path = cache_path
