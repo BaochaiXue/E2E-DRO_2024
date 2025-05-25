@@ -149,9 +149,8 @@ class pred_then_opt(nn.Module):
         """
 
         # Declare backtest object to hold the test results
-        portfolio = pc.backtest(
-            len(Y.test()) - Y.n_obs, self.n_y, Y.test().index[Y.n_obs :]
-        )
+        len_test = len(Y.test()) - Y.n_obs
+        portfolio = pc.backtest(len_test, self.n_y, Y.test().index[Y.n_obs :])
 
         # Store initial train/test split
         init_split = Y.split
@@ -246,9 +245,8 @@ class equal_weight:
         """
 
         # Declare backtest object to hold the test results
-        portfolio = pc.backtest(
-            len(Y.test()) - Y.n_obs, self.n_y, Y.test().index[Y.n_obs :]
-        )
+        len_test = len(Y.test()) - Y.n_obs
+        portfolio = pc.backtest(len_test, self.n_y, Y.test().index[Y.n_obs :])
 
         test_set = DataLoader(pc.SlidingWindow(X.test(), Y.test(), self.n_obs, 0))
 
