@@ -173,6 +173,8 @@ class e2e_net(nn.Module):
             )
 
         # LAYER: Optimization model
+        self.opt_layer_name = opt_layer
+        self.prisk_name = prisk
         self.opt_layer = OPT_LAYER_MAP[opt_layer](n_y, n_obs, RISK_FUNC_MAP[prisk])
 
         # Store reference path to store model data
@@ -591,3 +593,19 @@ class e2e_net(nn.Module):
         idx = cv_results.val_loss.idxmin()
         self.lr = cv_results.lr[idx]
         self.epochs = cv_results.epochs[idx]
+
+    # ------------------------------------------------------------------
+    # Pickling support: remove CvxpyLayer before pickling and recreate
+    # it when unpickling
+    # ------------------------------------------------------------------
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        if "opt_layer" in state:
+            del state["opt_layer"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.opt_layer = OPT_LAYER_MAP[self.opt_layer_name](
+            self.n_y, self.n_obs, RISK_FUNC_MAP[self.prisk_name]
+        )
