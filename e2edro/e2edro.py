@@ -599,13 +599,43 @@ class e2e_net(nn.Module):
     # it when unpickling
     # ------------------------------------------------------------------
     def __getstate__(self):
-        state = self.__dict__.copy()
-        if "opt_layer" in state:
-            del state["opt_layer"]
-        return state
+        """Return the state for pickling without the ``CvxpyLayer`` object.
+
+        ``torch.nn.Module`` provides its own ``__getstate__`` implementation
+        which may return either a dictionary or the tuple ``(state, meta)``
+        depending on the PyTorch version.  To ensure compatibility, we first
+        obtain the parent class state and then remove the ``opt_layer`` entry if
+        present.
+        """
+
+        # ``nn.Module`` implements ``__getstate__`` so call into ``super`` if
+        # available.  Fallback to ``self.__dict__`` for safety in case Torch is
+        # not installed when building the docs/tests.
+        parent_state = super().__getstate__() if hasattr(super(), "__getstate__") else self.__dict__
+
+        # ``parent_state`` can be either a dict or a tuple ``(state, meta)``.
+        if isinstance(parent_state, tuple) and len(parent_state) == 2:
+            state, meta = parent_state
+            state = dict(state)
+            state.pop("opt_layer", None)
+            parent_state = (state, meta)
+        else:
+            state = dict(parent_state)
+            state.pop("opt_layer", None)
+            parent_state = state
+
+        return parent_state
 
     def __setstate__(self, state):
-        self.__dict__.update(state)
+        """Reconstruct the module from the pickled state."""
+
+        if isinstance(state, tuple) and len(state) == 2:
+            s, meta = state
+            super().__setstate__((s, meta))
+        else:
+            super().__setstate__(state)
+
+        # Recreate the ``CvxpyLayer`` after loading the rest of the state.
         self.opt_layer = OPT_LAYER_MAP[self.opt_layer_name](
             self.n_y, self.n_obs, RISK_FUNC_MAP[self.prisk_name]
         )
