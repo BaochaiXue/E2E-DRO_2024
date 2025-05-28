@@ -13,8 +13,15 @@ import yaml
 
 
 def save_model(model: torch.nn.Module, path: str, cls: str, params: dict) -> None:
-    """Save only the state dict and constructor parameters."""
-    torch.save({"class": cls, "params": params, "state_dict": model.state_dict()}, path)
+    """Save only the state dict and constructor parameters.
+
+    ``equal_weight`` does not inherit from ``torch.nn.Module`` and therefore does
+    not implement ``state_dict``. For such objects we store an empty dictionary
+    so that ``load_model`` can skip loading any state.
+    """
+
+    state = model.state_dict() if hasattr(model, "state_dict") else {}
+    torch.save({"class": cls, "params": params, "state_dict": state}, path)
 
 
 def load_model(path: str):
@@ -37,7 +44,10 @@ def load_model(path: str):
     else:
         raise ValueError(f"Unknown model class: {cls}")
 
-    model.load_state_dict(data["state_dict"])
+    # ``equal_weight`` has no learnable parameters, so ``state_dict`` is empty
+    # and ``load_state_dict`` is not implemented.
+    if hasattr(model, "load_state_dict") and data["state_dict"]:
+        model.load_state_dict(data["state_dict"])
     return model
 
 # Ensure the package is importable when running this script directly
