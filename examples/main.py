@@ -40,7 +40,7 @@ os.makedirs(os.path.join(cache_path, "plots"), exist_ok=True)
 # Data frequency and start/end dates
 freq = "weekly"
 start = "2000-01-01"
-end = "2021-09-30"
+end = "2025-06-01"
 
 # Train, validation and test split percentage
 split = [0.6, 0.4]
