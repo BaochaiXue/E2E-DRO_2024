@@ -240,6 +240,25 @@ class equal_weight:
         self.n_y = n_y
         self.n_obs = n_obs
 
+    def state_dict(self) -> dict:
+        """Return the state of the model.
+
+        The equal-weight strategy has no learnable parameters, so this simply
+        returns an empty dictionary. Implemented to provide a minimal interface
+        compatible with ``torch.save``/``load`` utilities.
+        """
+
+        return {}
+
+    def load_state_dict(self, state_dict: dict) -> None:
+        """Load the state of the model.
+
+        Because the strategy is stateless, this method does nothing but is
+        present for API consistency.
+        """
+
+        return None
+
     # -----------------------------------------------------------------------------------------------
     # net_test: Test the e2e neural net
     # -----------------------------------------------------------------------------------------------
