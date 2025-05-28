@@ -37,7 +37,7 @@ def single_period_over_var_loss(z_star: torch.Tensor, y_perf: torch.Tensor) -> t
     """Loss based on the next period return scaled by realized volatility."""
 
     z_star, y_perf = _prepare_batch(z_star, y_perf)
-    rets = torch.bmm(y_perf, z_star.unsqueeze(-1)).squeeze(-1)
+    rets = torch.matmul(y_perf, z_star.unsqueeze(-1)).squeeze(-1)
     loss = -rets[:, 0] / rets.std(dim=1)
     return loss.mean()
 
@@ -46,6 +46,6 @@ def sharpe_loss(z_star: torch.Tensor, y_perf: torch.Tensor) -> torch.Tensor:
     """Loss function based on the out-of-sample Sharpe ratio."""
 
     z_star, y_perf = _prepare_batch(z_star, y_perf)
-    rets = torch.bmm(y_perf, z_star.unsqueeze(-1)).squeeze(-1)
+    rets = torch.matmul(y_perf, z_star.unsqueeze(-1)).squeeze(-1)
     loss = -rets.mean(dim=1) / rets.std(dim=1)
     return loss.mean()
