@@ -59,14 +59,17 @@ pip install -r requirements.txt
 
 ## Running the Example
 
-An example experiment script is available in `examples/main.py`. After
-installing the dependencies you can execute it with:
+Experiments are controlled via a YAML configuration file. After installing the
+dependencies you can execute them with:
 
 ```bash
 python examples/main.py
 ```
 
-The script caches downloaded data and intermediate results in the
+The default `examples/config.yaml` enables all experiments (`exp1`-`exp5`).
+Edit this file to run a subset.
+
+The scripts cache downloaded data and intermediate results in the
 `cache/exp/` directory (and `cache/exp5/` for the synthetic-data example).
 These folders are created automatically when running the loader so no manual
 setup is required.
