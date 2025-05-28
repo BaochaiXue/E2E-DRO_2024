@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import sys
 from typing import Iterable
+import yaml
 
 # Ensure the package is importable when running this script directly
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,18 +25,29 @@ cache_path_exp5 = "./cache/exp5/"
 os.makedirs(cache_path_exp5, exist_ok=True)
 os.makedirs(os.path.join(cache_path_exp5, "plots"), exist_ok=True)
 
+# Load hyperparameters from YAML config if available
+_cfg_path = os.environ.get("CONFIG_PATH", os.path.join(os.path.dirname(__file__), "config.yaml"))
+if os.path.exists(_cfg_path):
+    with open(_cfg_path, "r") as _f:
+        _cfg = yaml.safe_load(_f) or {}
+    HYP = _cfg.get("hyperparams", {})
+else:
+    HYP = {}
+
 # ---------------------------------------------------------------------------------------------------
 # Experiment 5: Load data
 # ---------------------------------------------------------------------------------------------------
 
 # Train, validation and test split percentage
-split = [0.7, 0.3]
+split = HYP.get("split", [0.7, 0.3])
 
-# Number of feattures and assets
-n_x, n_y = 5, 10
+# Number of features and assets
+n_x = HYP.get("n_x", 5)
+n_y = HYP.get("n_y", 10)
 
 # Number of observations per window and total number of observations
-n_obs, n_tot = 100, 1200
+n_obs = HYP.get("n_obs", 100)
+n_tot = HYP.get("n_tot", 1200)
 
 # Synthetic data: randomly generate data from a linear model
 X, Y = dl.synthetic_exp(n_x=n_x, n_y=n_y, n_obs=n_obs, n_tot=n_tot, split=split)
@@ -45,29 +57,29 @@ X, Y = dl.synthetic_exp(n_x=n_x, n_y=n_y, n_obs=n_obs, n_tot=n_tot, split=split)
 # ---------------------------------------------------------------------------------------------------
 
 # Performance loss function and performance period 'v+1'
-perf_loss = "sharpe_loss"
-perf_period = 13
+perf_loss = HYP.get("perf_loss", "sharpe_loss")
+perf_period = HYP.get("perf_period", 13)
 
 # Weight assigned to MSE prediction loss function
-pred_loss_factor = 0.5
+pred_loss_factor = HYP.get("pred_loss_factor", 0.5)
 
 # Risk function (default set to variance)
-prisk = "p_var"
+prisk = HYP.get("prisk", "p_var")
 
 # Robust decision layer to use: hellinger or tv
-dr_layer = "hellinger"
+dr_layer = HYP.get("dr_layer", "hellinger")
 
 # Determine whether to train the prediction weights Theta
-train_pred = True
+train_pred = HYP.get("train_pred", True)
 
 # List of learning rates to test
-lr_list = [0.005]
+lr_list = HYP.get("lr_list", [0.005])
 
 # List of total no. of epochs to test
-epoch_list = [5]
+epoch_list = HYP.get("epoch_list", [5])
 
 # Load saved models (default is False)
-use_cache = False
+use_cache = HYP.get("use_cache", False)
 
 # ---------------------------------------------------------------------------------------------------
 # Run
