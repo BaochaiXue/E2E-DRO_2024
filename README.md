@@ -67,7 +67,9 @@ python examples/main.py
 ```
 
 The default `examples/config.yaml` enables all experiments (`exp1`-`exp5`).
-Edit this file to run a subset.
+This file also defines a `hyperparams` section shared across the experiments.
+Edit it to adjust learning rates, loss functions or to run a subset of
+experiments.
 
 The scripts cache downloaded data and intermediate results in the
 `cache/exp/` directory (and `cache/exp5/` for the synthetic-data example).

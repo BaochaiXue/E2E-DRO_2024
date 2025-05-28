@@ -1,3 +1,13 @@
 experiments:
   - exp1
 
+# Common hyperparameters used by the experiments.
+hyperparams:
+  perf_loss: sharpe_loss
+  perf_period: 13
+  pred_loss_factor: 0.5
+  prisk: p_var
+  dr_layer: hellinger
+  lr_list: [0.005]
+  epoch_list: [5]
+

@@ -16,6 +16,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 def run_from_config(cfg_path: str) -> None:
     with open(cfg_path, "r") as f:
         cfg = yaml.safe_load(f)
+    # Provide the path to sub-scripts so they can load hyperparameters
+    os.environ["CONFIG_PATH"] = cfg_path
     experiments = cfg.get("experiments", [])
     hist_exps = [e for e in experiments if e in {"exp1", "exp2", "exp3", "exp4"}]
     synth = "exp5" in experiments

@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import os
 import sys
 from typing import Iterable
+import yaml
 
 # Ensure the package is importable when running this script directly
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,6 +22,15 @@ from e2edro import DataLoad as dl
 
 
 plt.close("all")
+
+# Load hyperparameters from YAML config if available
+_cfg_path = os.environ.get("CONFIG_PATH", os.path.join(os.path.dirname(__file__), "config.yaml"))
+if os.path.exists(_cfg_path):
+    with open(_cfg_path, "r") as _f:
+        _cfg = yaml.safe_load(_f) or {}
+    HYP = _cfg.get("hyperparams", {})
+else:
+    HYP = {}
 
 # Determine which experiments to run when executed via run_experiments.py
 _exp_env = os.environ.get("EXP_LIST")
@@ -45,18 +55,18 @@ os.makedirs(os.path.join(cache_path, "plots"), exist_ok=True)
 ####################################################################################################
 
 # Data frequency and start/end dates
-freq = "weekly"
-start = "1998-01-01"
-end = "2025-04-01"
+freq = HYP.get("freq", "weekly")
+start = HYP.get("start", "1998-01-01")
+end = HYP.get("end", "2025-04-01")
 
 # Train, validation and test split percentage
-split = [0.6, 0.4]
+split = HYP.get("split", [0.6, 0.4])
 
 # Number of observations per window
-n_obs = 104
+n_obs = HYP.get("n_obs", 104)
 
 # Number of assets
-n_y = 20
+n_y = HYP.get("n_y", 20)
 
 # API key placeholder (not used).
 # Asset prices are always downloaded via ``yfinance``.
@@ -90,29 +100,29 @@ stats = dl.statanalysis(X.data, Y.data)
 # ---------------------------------------------------------------------------------------------------
 
 # Performance loss function and performance period 'v+1'
-perf_loss = "sharpe_loss"
-perf_period = 13
+perf_loss = HYP.get("perf_loss", "sharpe_loss")
+perf_period = HYP.get("perf_period", 13)
 
 # Weight assigned to MSE prediction loss function
-pred_loss_factor = 0.5
+pred_loss_factor = HYP.get("pred_loss_factor", 0.5)
 
 # Risk function (default set to variance)
-prisk = "p_var"
+prisk = HYP.get("prisk", "p_var")
 
 # Robust decision layer to use: hellinger or tv
-dr_layer = "hellinger"
+dr_layer = HYP.get("dr_layer", "hellinger")
 
 # List of learning rates to test
-lr_list = [0.005]
+lr_list = HYP.get("lr_list", [0.005])
 
 # List of total no. of epochs to test
-epoch_list = [5]
+epoch_list = HYP.get("epoch_list", [5])
 
 # For replicability, set the random seed for the numerical experiments
-set_seed = 1000
+set_seed = HYP.get("set_seed", 1000)
 
 # Load saved models (default is False)
-use_cache = False
+use_cache = HYP.get("use_cache", False)
 
 # ---------------------------------------------------------------------------------------------------
 # Run
