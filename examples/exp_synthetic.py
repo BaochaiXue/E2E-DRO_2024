@@ -6,6 +6,35 @@ import sys
 from typing import Iterable
 import yaml
 
+
+def save_model(model: torch.nn.Module, path: str, cls: str, params: dict) -> None:
+    """Save state dict and constructor parameters."""
+    torch.save({"class": cls, "params": params, "state_dict": model.state_dict()}, path)
+
+
+def load_model(path: str):
+    """Load a model saved via ``save_model``."""
+    data = torch.load(path, map_location="cpu")
+    cls = data["class"]
+    params = data["params"]
+    if cls == "e2e_net":
+        from e2edro import e2edro as e2e
+
+        model = e2e.e2e_net(**params).double()
+    elif cls == "pred_then_opt":
+        from e2edro import BaseModels as bm
+
+        model = bm.pred_then_opt(**params).double()
+    elif cls == "equal_weight":
+        from e2edro import BaseModels as bm
+
+        model = bm.equal_weight(**params)
+    else:
+        raise ValueError(f"Unknown model class: {cls}")
+
+    model.load_state_dict(data["state_dict"])
+    return model
+
 # Ensure the package is importable when running this script directly
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
@@ -85,12 +114,12 @@ use_cache = HYP.get("use_cache", False)
 # Run
 # ---------------------------------------------------------------------------------------------------
 if use_cache:
-    nom_net_linear = torch.load(cache_path_exp5 + "nom_net_linear.pt")
-    nom_net_2layer = torch.load(cache_path_exp5 + "nom_net_2layer.pt")
-    nom_net_3layer = torch.load(cache_path_exp5 + "nom_net_3layer.pt")
-    dr_net_linear = torch.load(cache_path_exp5 + "dr_net_linear.pt")
-    dr_net_2layer = torch.load(cache_path_exp5 + "dr_net_2layer.pt")
-    dr_net_3layer = torch.load(cache_path_exp5 + "dr_net_3layer.pt")
+    nom_net_linear = load_model(cache_path_exp5 + "nom_net_linear.pt")
+    nom_net_2layer = load_model(cache_path_exp5 + "nom_net_2layer.pt")
+    nom_net_3layer = load_model(cache_path_exp5 + "nom_net_3layer.pt")
+    dr_net_linear = load_model(cache_path_exp5 + "dr_net_linear.pt")
+    dr_net_2layer = load_model(cache_path_exp5 + "dr_net_2layer.pt")
+    dr_net_3layer = load_model(cache_path_exp5 + "dr_net_3layer.pt")
 else:
 
     # Import heavy dependencies only when running the synthetic examples that rely on the differentiable optimization layers.
@@ -120,7 +149,25 @@ else:
     ).double()
     nom_net_linear.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     nom_net_linear.net_roll_test(X, Y, n_roll=1)
-    torch.save(nom_net_linear, cache_path + "nom_net_linear.pt")
+    save_model(
+        nom_net_linear,
+        cache_path + "nom_net_linear.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=train_pred,
+            train_gamma=True,
+            train_delta=True,
+            set_seed=set_seed,
+            opt_layer="nominal",
+            perf_loss=perf_loss,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("nom_net_linear run complete")
 
     # DR E2E linear
@@ -140,7 +187,25 @@ else:
     ).double()
     dr_net_linear.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     dr_net_linear.net_roll_test(X, Y, n_roll=1)
-    torch.save(dr_net_linear, cache_path + "dr_net_linear.pt")
+    save_model(
+        dr_net_linear,
+        cache_path + "dr_net_linear.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=train_pred,
+            train_gamma=True,
+            train_delta=True,
+            set_seed=set_seed,
+            opt_layer=dr_layer,
+            perf_loss=perf_loss,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("dr_net_linear run complete")
 
     # ***********************************************************************************************
@@ -168,7 +233,26 @@ else:
     ).double()
     nom_net_2layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     nom_net_2layer.net_roll_test(X, Y, n_roll=1)
-    torch.save(nom_net_2layer, cache_path + "nom_net_2layer.pt")
+    save_model(
+        nom_net_2layer,
+        cache_path + "nom_net_2layer.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=train_pred,
+            train_gamma=True,
+            train_delta=True,
+            pred_model="2layer",
+            set_seed=set_seed,
+            opt_layer="nominal",
+            perf_loss=perf_loss,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("nom_net_2layer run complete")
 
     # DR E2E 2-layer
@@ -189,7 +273,26 @@ else:
     ).double()
     dr_net_2layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     dr_net_2layer.net_roll_test(X, Y, n_roll=1)
-    torch.save(dr_net_2layer, cache_path + "dr_net_2layer.pt")
+    save_model(
+        dr_net_2layer,
+        cache_path + "dr_net_2layer.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=train_pred,
+            train_gamma=True,
+            train_delta=True,
+            pred_model="2layer",
+            set_seed=set_seed,
+            opt_layer=dr_layer,
+            perf_loss=perf_loss,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("dr_net_2layer run complete")
 
     # ***********************************************************************************************
@@ -217,7 +320,26 @@ else:
     ).double()
     nom_net_3layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     nom_net_3layer.net_roll_test(X, Y, n_roll=1)
-    torch.save(nom_net_3layer, cache_path + "nom_net_3layer.pt")
+    save_model(
+        nom_net_3layer,
+        cache_path + "nom_net_3layer.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=train_pred,
+            train_gamma=True,
+            train_delta=True,
+            pred_model="3layer",
+            set_seed=set_seed,
+            opt_layer="nominal",
+            perf_loss=perf_loss,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("nom_net_3layer run complete")
 
     # DR E2E 3-layer
@@ -238,7 +360,26 @@ else:
     ).double()
     dr_net_3layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     dr_net_3layer.net_roll_test(X, Y, n_roll=1)
-    torch.save(dr_net_3layer, cache_path + "dr_net_3layer.pt")
+    save_model(
+        dr_net_3layer,
+        cache_path + "dr_net_3layer.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=train_pred,
+            train_gamma=True,
+            train_delta=True,
+            pred_model="3layer",
+            set_seed=set_seed,
+            opt_layer=dr_layer,
+            perf_loss=perf_loss,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("dr_net_3layer run complete")
 
 # ---------------------------------------------------------------------------------------------------

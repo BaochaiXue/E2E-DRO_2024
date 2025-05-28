@@ -11,6 +11,35 @@ import sys
 from typing import Iterable
 import yaml
 
+
+def save_model(model: torch.nn.Module, path: str, cls: str, params: dict) -> None:
+    """Save only the state dict and constructor parameters."""
+    torch.save({"class": cls, "params": params, "state_dict": model.state_dict()}, path)
+
+
+def load_model(path: str):
+    """Load a model saved via ``save_model``."""
+    data = torch.load(path, map_location="cpu")
+    cls = data["class"]
+    params = data["params"]
+    if cls == "e2e_net":
+        from e2edro import e2edro as e2e
+
+        model = e2e.e2e_net(**params).double()
+    elif cls == "pred_then_opt":
+        from e2edro import BaseModels as bm
+
+        model = bm.pred_then_opt(**params).double()
+    elif cls == "equal_weight":
+        from e2edro import BaseModels as bm
+
+        model = bm.equal_weight(**params)
+    else:
+        raise ValueError(f"Unknown model class: {cls}")
+
+    model.load_state_dict(data["state_dict"])
+    return model
+
 # Ensure the package is importable when running this script directly
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
@@ -130,32 +159,32 @@ use_cache = HYP.get("use_cache", False)
 
 if use_cache:
     # Load cached models and backtest results
-    ew_net = torch.load(cache_path + "ew_net.pt")
-    po_net = torch.load(cache_path + "po_net.pt")
-    base_net = torch.load(cache_path + "base_net.pt")
-    nom_net = torch.load(cache_path + "nom_net.pt")
-    dr_net = torch.load(cache_path + "dr_net.pt")
-    dr_po_net = torch.load(cache_path + "dr_po_net.pt")
-    dr_net_learn_delta = torch.load(cache_path + "dr_net_learn_delta.pt")
-    nom_net_learn_gamma = torch.load(cache_path + "nom_net_learn_gamma.pt")
-    dr_net_learn_gamma = torch.load(cache_path + "dr_net_learn_gamma.pt")
-    dr_net_learn_gamma_delta = torch.load(cache_path + "dr_net_learn_gamma_delta.pt")
-    nom_net_learn_theta = torch.load(cache_path + "nom_net_learn_theta.pt")
-    dr_net_learn_theta = torch.load(cache_path + "dr_net_learn_theta.pt")
+    ew_net = load_model(cache_path + "ew_net.pt")
+    po_net = load_model(cache_path + "po_net.pt")
+    base_net = load_model(cache_path + "base_net.pt")
+    nom_net = load_model(cache_path + "nom_net.pt")
+    dr_net = load_model(cache_path + "dr_net.pt")
+    dr_po_net = load_model(cache_path + "dr_po_net.pt")
+    dr_net_learn_delta = load_model(cache_path + "dr_net_learn_delta.pt")
+    nom_net_learn_gamma = load_model(cache_path + "nom_net_learn_gamma.pt")
+    dr_net_learn_gamma = load_model(cache_path + "dr_net_learn_gamma.pt")
+    dr_net_learn_gamma_delta = load_model(cache_path + "dr_net_learn_gamma_delta.pt")
+    nom_net_learn_theta = load_model(cache_path + "nom_net_learn_theta.pt")
+    dr_net_learn_theta = load_model(cache_path + "dr_net_learn_theta.pt")
 
-    base_net_ext = torch.load(cache_path + "base_net_ext.pt")
-    nom_net_ext = torch.load(cache_path + "nom_net_ext.pt")
-    dr_net_ext = torch.load(cache_path + "dr_net_ext.pt")
-    dr_net_learn_delta_ext = torch.load(cache_path + "dr_net_learn_delta_ext.pt")
-    nom_net_learn_gamma_ext = torch.load(cache_path + "nom_net_learn_gamma_ext.pt")
-    dr_net_learn_gamma_ext = torch.load(cache_path + "dr_net_learn_gamma_ext.pt")
-    nom_net_learn_theta_ext = torch.load(cache_path + "nom_net_learn_theta_ext.pt")
-    dr_net_learn_theta_ext = torch.load(cache_path + "dr_net_learn_theta_ext.pt")
+    base_net_ext = load_model(cache_path + "base_net_ext.pt")
+    nom_net_ext = load_model(cache_path + "nom_net_ext.pt")
+    dr_net_ext = load_model(cache_path + "dr_net_ext.pt")
+    dr_net_learn_delta_ext = load_model(cache_path + "dr_net_learn_delta_ext.pt")
+    nom_net_learn_gamma_ext = load_model(cache_path + "nom_net_learn_gamma_ext.pt")
+    dr_net_learn_gamma_ext = load_model(cache_path + "dr_net_learn_gamma_ext.pt")
+    nom_net_learn_theta_ext = load_model(cache_path + "nom_net_learn_theta_ext.pt")
+    dr_net_learn_theta_ext = load_model(cache_path + "dr_net_learn_theta_ext.pt")
 
-    dr_net_tv = torch.load(cache_path + "dr_net_tv.pt")
-    dr_net_tv_learn_delta = torch.load(cache_path + "dr_net_tv_learn_delta.pt")
-    dr_net_tv_learn_gamma = torch.load(cache_path + "dr_net_tv_learn_gamma.pt")
-    dr_net_tv_learn_theta = torch.load(cache_path + "dr_net_tv_learn_theta.pt")
+    dr_net_tv = load_model(cache_path + "dr_net_tv.pt")
+    dr_net_tv_learn_delta = load_model(cache_path + "dr_net_tv_learn_delta.pt")
+    dr_net_tv_learn_gamma = load_model(cache_path + "dr_net_tv_learn_gamma.pt")
+    dr_net_tv_learn_theta = load_model(cache_path + "dr_net_tv_learn_theta.pt")
 else:
     # Import here to avoid importing heavy dependencies when using only the
     # equal-weight example. ``e2edro`` requires ``cvxpylayers`` and ``diffcp``.
@@ -164,13 +193,23 @@ else:
     # Exp 1: Equal weight portfolio
     ew_net = bm.equal_weight(n_x, n_y, n_obs)
     ew_net.net_roll_test(X, Y, n_roll=4)
-    torch.save(ew_net, cache_path + "ew_net.pt")
+    save_model(
+        ew_net,
+        cache_path + "ew_net.pt",
+        "equal_weight",
+        dict(n_x=n_x, n_y=n_y, n_obs=n_obs),
+    )
     print("ew_net run complete")
 
     # Exp 1, 2, 3: Predict-then-optimize system
     po_net = bm.pred_then_opt(n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk).double()
     po_net.net_roll_test(X, Y)
-    torch.save(po_net, cache_path + "po_net.pt")
+    save_model(
+        po_net,
+        cache_path + "po_net.pt",
+        "pred_then_opt",
+        dict(n_x=n_x, n_y=n_y, n_obs=n_obs, set_seed=set_seed, prisk=prisk),
+    )
     print("po_net run complete")
 
     # Exp 1: Base E2E
@@ -190,7 +229,26 @@ else:
     ).double()
     base_net.net_cv(X, Y, lr_list, epoch_list)
     base_net.net_roll_test(X, Y)
-    torch.save(base_net, cache_path + "base_net.pt")
+    save_model(
+        base_net,
+        cache_path + "base_net.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=True,
+            train_gamma=False,
+            train_delta=False,
+            set_seed=set_seed,
+            opt_layer="base_mod",
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("base_net run complete")
 
     # Exp 1: Nominal E2E
@@ -211,7 +269,26 @@ else:
     ).double()
     nom_net.net_cv(X, Y, lr_list, epoch_list)
     nom_net.net_roll_test(X, Y)
-    torch.save(nom_net, cache_path + "nom_net.pt")
+    save_model(
+        nom_net,
+        cache_path + "nom_net.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=True,
+            train_gamma=True,
+            train_delta=False,
+            set_seed=set_seed,
+            opt_layer="nominal",
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("nom_net run complete")
 
     # Exp 1: DR E2E
@@ -232,7 +309,26 @@ else:
     ).double()
     dr_net.net_cv(X, Y, lr_list, epoch_list)
     dr_net.net_roll_test(X, Y)
-    torch.save(dr_net, cache_path + "dr_net.pt")
+    save_model(
+        dr_net,
+        cache_path + "dr_net.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=True,
+            train_gamma=True,
+            train_delta=True,
+            set_seed=set_seed,
+            opt_layer=dr_layer,
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("dr_net run complete")
 
     # Exp 2: DR predict-then-optimize system
@@ -240,7 +336,19 @@ else:
         n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk, opt_layer=dr_layer
     ).double()
     dr_po_net.net_roll_test(X, Y)
-    torch.save(dr_po_net, cache_path + "dr_po_net.pt")
+    save_model(
+        dr_po_net,
+        cache_path + "dr_po_net.pt",
+        "pred_then_opt",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            set_seed=set_seed,
+            prisk=prisk,
+            opt_layer=dr_layer,
+        ),
+    )
     print("dr_po_net run complete")
 
     # Exp 2: DR E2E (fixed theta and gamma, learn delta)
@@ -261,7 +369,26 @@ else:
     ).double()
     dr_net_learn_delta.net_cv(X, Y, lr_list, epoch_list)
     dr_net_learn_delta.net_roll_test(X, Y)
-    torch.save(dr_net_learn_delta, cache_path + "dr_net_learn_delta.pt")
+    save_model(
+        dr_net_learn_delta,
+        cache_path + "dr_net_learn_delta.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=False,
+            train_gamma=False,
+            train_delta=True,
+            set_seed=set_seed,
+            opt_layer=dr_layer,
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("dr_net_learn_delta run complete")
 
     # Exp 3: Nominal E2E (fixed theta, learn gamma)
@@ -282,7 +409,26 @@ else:
     ).double()
     nom_net_learn_gamma.net_cv(X, Y, lr_list, epoch_list)
     nom_net_learn_gamma.net_roll_test(X, Y)
-    torch.save(nom_net_learn_gamma, cache_path + "nom_net_learn_gamma.pt")
+    save_model(
+        nom_net_learn_gamma,
+        cache_path + "nom_net_learn_gamma.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=False,
+            train_gamma=True,
+            train_delta=False,
+            set_seed=set_seed,
+            opt_layer="nominal",
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("nom_net_learn_gamma run complete")
 
     # Exp 3: DR E2E (fixed theta, learn gamma, fixed delta)
@@ -303,7 +449,26 @@ else:
     ).double()
     dr_net_learn_gamma.net_cv(X, Y, lr_list, epoch_list)
     dr_net_learn_gamma.net_roll_test(X, Y)
-    torch.save(dr_net_learn_gamma, cache_path + "dr_net_learn_gamma.pt")
+    save_model(
+        dr_net_learn_gamma,
+        cache_path + "dr_net_learn_gamma.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=False,
+            train_gamma=True,
+            train_delta=False,
+            set_seed=set_seed,
+            opt_layer=dr_layer,
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("dr_net_learn_gamma run complete")
 
     # Exp 4: Nominal E2E (learn theta, fixed gamma)
@@ -324,7 +489,26 @@ else:
     ).double()
     nom_net_learn_theta.net_cv(X, Y, lr_list, epoch_list)
     nom_net_learn_theta.net_roll_test(X, Y)
-    torch.save(nom_net_learn_theta, cache_path + "nom_net_learn_theta.pt")
+    save_model(
+        nom_net_learn_theta,
+        cache_path + "nom_net_learn_theta.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=True,
+            train_gamma=False,
+            train_delta=False,
+            set_seed=set_seed,
+            opt_layer="nominal",
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("nom_net_learn_theta run complete")
 
     # Exp 4: DR E2E (learn theta, fixed gamma and delta)
@@ -345,7 +529,26 @@ else:
     ).double()
     dr_net_learn_theta.net_cv(X, Y, lr_list, epoch_list)
     dr_net_learn_theta.net_roll_test(X, Y)
-    torch.save(dr_net_learn_theta, cache_path + "dr_net_learn_theta.pt")
+    save_model(
+        dr_net_learn_theta,
+        cache_path + "dr_net_learn_theta.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=True,
+            train_gamma=False,
+            train_delta=False,
+            set_seed=set_seed,
+            opt_layer=dr_layer,
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("dr_net_learn_theta run complete")
 
     # Exp 5: DR E2E (learn gamma, delta, fixed theta)
@@ -366,7 +569,26 @@ else:
     ).double()
     dr_net_learn_gamma_delta.net_cv(X, Y, lr_list, epoch_list)
     dr_net_learn_gamma_delta.net_roll_test(X, Y)
-    torch.save(dr_net_learn_gamma_delta, cache_path + "dr_net_learn_gamma_delta.pt")
+    save_model(
+        dr_net_learn_gamma_delta,
+        cache_path + "dr_net_learn_gamma_delta.pt",
+        "e2e_net",
+        dict(
+            n_x=n_x,
+            n_y=n_y,
+            n_obs=n_obs,
+            prisk=prisk,
+            train_pred=False,
+            train_gamma=True,
+            train_delta=True,
+            set_seed=set_seed,
+            opt_layer=dr_layer,
+            perf_loss=perf_loss,
+            cache_path=cache_path,
+            perf_period=perf_period,
+            pred_loss_factor=pred_loss_factor,
+        ),
+    )
     print("dr_net_learn_gamma_delta run complete")
 
 ####################################################################################################
