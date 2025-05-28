@@ -110,33 +110,42 @@ class pred_then_opt(nn.Module):
         y_hat: Prediction. (n_y x 1) vector of outputs of the prediction layer
         z_star: Optimal solution. (n_y x 1) vector of asset weights
         """
-        # Predict y_hat from x
-        Y_hat = torch.stack([self.pred_layer(x_t) for x_t in X])
+        batch = X.dim() == 3
+        if not batch:
+            X = X.unsqueeze(0)
+            Y = Y.unsqueeze(0)
 
-        # Calculate residuals and process them
-        ep = Y - Y_hat[:-1]
-        y_hat = Y_hat[-1]
+        Y_hat = self.pred_layer(X)
+
+        ep = Y - Y_hat[:, :-1]
+        y_hat = Y_hat[:, -1]
 
         # Optimization solver arguments (from CVXPY for SCS solver)
         solver_args = {"solve_method": "ECOS"}
 
         # Optimize z per scenario
         # Determine whether nominal or dro model
-        if self.model_type == "nom":
-            (z_star,) = self.opt_layer(ep, y_hat, self.gamma, solver_args=solver_args)
-        elif self.model_type == "dro":
-            (z_star,) = self.opt_layer(
-                ep, y_hat, self.gamma, self.delta, solver_args=solver_args
-            )
-        elif self.model_type == "base_mod":
-            (z_star,) = self.opt_layer(y_hat, solver_args=solver_args)
+        z_list = []
+        for i in range(X.size(0)):
+            if self.model_type == "nom":
+                (z,) = self.opt_layer(ep[i], y_hat[i], self.gamma, solver_args=solver_args)
+            elif self.model_type == "dro":
+                (z,) = self.opt_layer(
+                    ep[i], y_hat[i], self.gamma, self.delta, solver_args=solver_args
+                )
+            elif self.model_type == "base_mod":
+                (z,) = self.opt_layer(y_hat[i], solver_args=solver_args)
+            z_list.append(z)
+        z_star = torch.stack(z_list)
 
+        if not batch:
+            return z_star[0], y_hat[0]
         return z_star, y_hat
 
     # -----------------------------------------------------------------------------------------------
     # net_test: Test the e2e neural net
     # -----------------------------------------------------------------------------------------------
-    def net_roll_test(self, X, Y, n_roll=4):
+    def net_roll_test(self, X, Y, n_roll=4, batch_size: int = 1):
         """Neural net rolling window out-of-sample test
 
         Inputs
@@ -171,7 +180,10 @@ class pred_then_opt(nn.Module):
                 split[1] = 1 - split[0]
 
             X.split_update(split), Y.split_update(split)
-            test_set = DataLoader(pc.SlidingWindow(X.test(), Y.test(), self.n_obs, 0))
+            test_set = DataLoader(
+                pc.SlidingWindow(X.test(), Y.test(), self.n_obs, 0),
+                batch_size=batch_size,
+            )
 
             X_train, Y_train = X.train(), Y.train()
             X_train.insert(0, "ones", 1.0)
@@ -191,14 +203,13 @@ class pred_then_opt(nn.Module):
             with torch.no_grad():
                 for j, (x, y, y_perf) in enumerate(test_set):
 
-                    # Predict and optimize
-                    z_star, _ = self(x.squeeze(), y.squeeze())
+                    z_star, _ = self(x, y)
 
-                    # Store portfolio weights and returns for each time step 't'
-                    portfolio.weights[t] = z_star.squeeze()
-                    portfolio.rets[t] = y_perf.squeeze() @ portfolio.weights[t]
+                    bsz = x.size(0)
+                    portfolio.weights[t : t + bsz] = z_star.squeeze()
+                    portfolio.rets[t : t + bsz] = (y_perf[:, 0, :] * portfolio.weights[t : t + bsz]).sum(dim=1)
 
-                    t += 1
+                    t += bsz
 
         # Reset dataset
         X, Y = X.split_update(init_split), Y.split_update(init_split)
@@ -232,7 +243,7 @@ class equal_weight:
     # -----------------------------------------------------------------------------------------------
     # net_test: Test the e2e neural net
     # -----------------------------------------------------------------------------------------------
-    def net_roll_test(self, X, Y, n_roll=4):
+    def net_roll_test(self, X, Y, n_roll=4, batch_size: int = 1):
         """Neural net rolling window out-of-sample test
 
         Inputs
@@ -248,15 +259,19 @@ class equal_weight:
         len_test = len(Y.test()) - Y.n_obs
         portfolio = pc.backtest(len_test, self.n_y, Y.test().index[Y.n_obs :])
 
-        test_set = DataLoader(pc.SlidingWindow(X.test(), Y.test(), self.n_obs, 0))
+        test_set = DataLoader(
+            pc.SlidingWindow(X.test(), Y.test(), self.n_obs, 0),
+            batch_size=batch_size,
+        )
 
         # Test model
         t = 0
         for j, (x, y, y_perf) in enumerate(test_set):
 
-            portfolio.weights[t] = np.ones(self.n_y) / self.n_y
-            portfolio.rets[t] = y_perf.squeeze() @ portfolio.weights[t]
-            t += 1
+            bsz = x.size(0)
+            portfolio.weights[t : t + bsz] = np.ones((bsz, self.n_y)) / self.n_y
+            portfolio.rets[t : t + bsz] = (y_perf[:, 0, :] * portfolio.weights[t : t + bsz]).sum(dim=1)
+            t += bsz
 
         # Calculate the portfolio statistics using the realized portfolio returns
         portfolio.stats()

@@ -107,6 +107,9 @@ lr_list = HYP.get("lr_list", [0.005])
 # List of total no. of epochs to test
 epoch_list = HYP.get("epoch_list", [5])
 
+# Batch size for DataLoader objects
+batch_size = HYP.get("batch_size", 1)
+
 # Load saved models (default is False)
 use_cache = HYP.get("use_cache", False)
 
@@ -147,8 +150,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    nom_net_linear.net_cv(X, Y, lr_list, epoch_list, n_val=1)
-    nom_net_linear.net_roll_test(X, Y, n_roll=1)
+    nom_net_linear.net_cv(X, Y, lr_list, epoch_list, n_val=1, batch_size=batch_size)
+    nom_net_linear.net_roll_test(X, Y, n_roll=1, batch_size=batch_size)
     save_model(
         nom_net_linear,
         cache_path + "nom_net_linear.pt",
@@ -185,8 +188,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    dr_net_linear.net_cv(X, Y, lr_list, epoch_list, n_val=1)
-    dr_net_linear.net_roll_test(X, Y, n_roll=1)
+    dr_net_linear.net_cv(X, Y, lr_list, epoch_list, n_val=1, batch_size=batch_size)
+    dr_net_linear.net_roll_test(X, Y, n_roll=1, batch_size=batch_size)
     save_model(
         dr_net_linear,
         cache_path + "dr_net_linear.pt",
@@ -231,8 +234,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    nom_net_2layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
-    nom_net_2layer.net_roll_test(X, Y, n_roll=1)
+    nom_net_2layer.net_cv(X, Y, lr_list, epoch_list, n_val=1, batch_size=batch_size)
+    nom_net_2layer.net_roll_test(X, Y, n_roll=1, batch_size=batch_size)
     save_model(
         nom_net_2layer,
         cache_path + "nom_net_2layer.pt",
@@ -271,8 +274,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    dr_net_2layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
-    dr_net_2layer.net_roll_test(X, Y, n_roll=1)
+    dr_net_2layer.net_cv(X, Y, lr_list, epoch_list, n_val=1, batch_size=batch_size)
+    dr_net_2layer.net_roll_test(X, Y, n_roll=1, batch_size=batch_size)
     save_model(
         dr_net_2layer,
         cache_path + "dr_net_2layer.pt",
@@ -318,8 +321,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    nom_net_3layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
-    nom_net_3layer.net_roll_test(X, Y, n_roll=1)
+    nom_net_3layer.net_cv(X, Y, lr_list, epoch_list, n_val=1, batch_size=batch_size)
+    nom_net_3layer.net_roll_test(X, Y, n_roll=1, batch_size=batch_size)
     save_model(
         nom_net_3layer,
         cache_path + "nom_net_3layer.pt",
@@ -358,8 +361,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    dr_net_3layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
-    dr_net_3layer.net_roll_test(X, Y, n_roll=1)
+    dr_net_3layer.net_cv(X, Y, lr_list, epoch_list, n_val=1, batch_size=batch_size)
+    dr_net_3layer.net_roll_test(X, Y, n_roll=1, batch_size=batch_size)
     save_model(
         dr_net_3layer,
         cache_path + "dr_net_3layer.pt",

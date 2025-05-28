@@ -9,53 +9,43 @@ import torch
 ####################################################################################################
 # Performance loss functions
 ####################################################################################################
-def single_period_loss(z_star, y_perf):
-    """Loss function based on the out-of-sample portfolio return
+def _prepare_batch(z_star: torch.Tensor, y_perf: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    """Ensure ``z_star`` and ``y_perf`` both have a batch dimension."""
+    if z_star.dim() == 1:
+        z_star = z_star.unsqueeze(0)
+    if z_star.dim() == 2 and z_star.size(-1) != 1:
+        z_star = z_star.unsqueeze(-1)
 
-    Compute the out-of-sample portfolio return for portfolio z_t over the next time step. The
-    loss is aggregated for all z_t in Z_star and averaged over the number of observations.
+    if y_perf.dim() == 2:
+        y_perf = y_perf.unsqueeze(0)
+    return z_star.squeeze(-1), y_perf
 
-    Inputs
-    z_star: Optimal solution. (n_y x 1) tensor of optimal decisions.
-    y_perf: Realizations. (perf_period x n_y) tensor of realized values.
 
-    Output
-    loss: realized return at time 't'
+def single_period_loss(z_star: torch.Tensor, y_perf: torch.Tensor) -> torch.Tensor:
+    """Loss based on the out-of-sample portfolio return for the next time step.
+
+    ``z_star`` and ``y_perf`` can contain an optional batch dimension which will
+    be averaged over.
     """
-    loss = -y_perf[0] @ z_star
-    return loss
+
+    z_star, y_perf = _prepare_batch(z_star, y_perf)
+    ret = (y_perf[:, 0, :] * z_star).sum(dim=1)
+    return -ret.mean()
 
 
-def single_period_over_var_loss(z_star, y_perf):
-    """Loss function based on the out-of-sample portfolio return over volatility
+def single_period_over_var_loss(z_star: torch.Tensor, y_perf: torch.Tensor) -> torch.Tensor:
+    """Loss based on the next period return scaled by realized volatility."""
 
-    Compute the out-of-sample portfolio return for portfolio z_star over the next time step. Divide
-    by the realized volatility over the performance period ('perf_period')
-
-    Inputs
-    z_star: Optimal solution. (n_y x 1) tensor of optimal decisions.
-    y_perf: Realizations. (perf_period x n_y) tensor of realized values.
-
-    Output
-    loss: realized return at time 't' over realized volatility from 't' to 't + perf_period'
-    """
-    loss = -y_perf[0] @ z_star / torch.std(y_perf @ z_star)
-    return loss
+    z_star, y_perf = _prepare_batch(z_star, y_perf)
+    rets = torch.bmm(y_perf, z_star.unsqueeze(-1)).squeeze(-1)
+    loss = -rets[:, 0] / rets.std(dim=1)
+    return loss.mean()
 
 
-def sharpe_loss(z_star, y_perf):
-    """Loss function based on the out-of-sample Sharpe ratio
+def sharpe_loss(z_star: torch.Tensor, y_perf: torch.Tensor) -> torch.Tensor:
+    """Loss function based on the out-of-sample Sharpe ratio."""
 
-    Compute the out-of-sample Sharpe ratio of the portfolio z_t over the next 12 time steps. The
-    loss is aggregated for all z_t in Z_star and averaged over the number of observations. We use a
-    simplified version of the Sharpe ratio, SR = realized mean / realized std dev.
-
-    Inputs
-    z_star: Optimal solution. (n_y x 1) tensor of optimal decisions.
-    y_perf: Realizations. (perf_period x n_y) tensor of realized values.
-
-    Output
-    loss: realized average return over realized volatility from 't' to 't + perf_period'
-    """
-    loss = -torch.mean(y_perf @ z_star) / torch.std(y_perf @ z_star)
-    return loss
+    z_star, y_perf = _prepare_batch(z_star, y_perf)
+    rets = torch.bmm(y_perf, z_star.unsqueeze(-1)).squeeze(-1)
+    loss = -rets.mean(dim=1) / rets.std(dim=1)
+    return loss.mean()
