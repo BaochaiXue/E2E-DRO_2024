@@ -238,12 +238,15 @@ class e2e_net(nn.Module):
         y_hat: Prediction. (n_y x 1) vector of outputs of the prediction layer
         z_star: Optimal solution. (n_y x 1) vector of asset weights
         """
-        # Multiple predictions Y_hat from X
-        Y_hat = torch.stack([self.pred_layer(x_t) for x_t in X])
+        batch = X.dim() == 3
+        if not batch:
+            X = X.unsqueeze(0)
+            Y = Y.unsqueeze(0)
 
-        # Calculate residuals and process them
-        ep = Y - Y_hat[:-1]
-        y_hat = Y_hat[-1]
+        Y_hat = self.pred_layer(X)
+
+        ep = Y - Y_hat[:, :-1]
+        y_hat = Y_hat[:, -1]
 
         # Optimization solver arguments (from CVXPY for ECOS/SCS solver)
         solver_args = {"solve_method": "ECOS", "max_iters": 120, "abstol": 1e-7}
@@ -252,15 +255,21 @@ class e2e_net(nn.Module):
 
         # Optimize z per scenario
         # Determine whether nominal or dro model
-        if self.model_type == "nom":
-            (z_star,) = self.opt_layer(ep, y_hat, self.gamma, solver_args=solver_args)
-        elif self.model_type == "dro":
-            (z_star,) = self.opt_layer(
-                ep, y_hat, self.gamma, self.delta, solver_args=solver_args
-            )
-        elif self.model_type == "base_mod":
-            (z_star,) = self.opt_layer(y_hat, solver_args=solver_args)
+        z_list = []
+        for i in range(X.size(0)):
+            if self.model_type == "nom":
+                (z,) = self.opt_layer(ep[i], y_hat[i], self.gamma, solver_args=solver_args)
+            elif self.model_type == "dro":
+                (z,) = self.opt_layer(
+                    ep[i], y_hat[i], self.gamma, self.delta, solver_args=solver_args
+                )
+            elif self.model_type == "base_mod":
+                (z,) = self.opt_layer(y_hat[i], solver_args=solver_args)
+            z_list.append(z)
+        z_star = torch.stack(z_list)
 
+        if not batch:
+            return z_star[0], y_hat[0]
         return z_star, y_hat
 
     # -----------------------------------------------------------------------------------------------
@@ -292,7 +301,7 @@ class e2e_net(nn.Module):
         optimizer = torch.optim.Adam(self.parameters(), lr=lr)
 
         # Number of elements in training set
-        n_train = len(train_set)
+        n_train = len(train_set.dataset)
 
         # Train the neural network
         for epoch in range(epochs):
@@ -303,17 +312,17 @@ class e2e_net(nn.Module):
             for t, (x, y, y_perf) in enumerate(train_set):
 
                 # Forward pass: predict and optimize
-                z_star, y_hat = self(x.squeeze(), y.squeeze())
+                z_star, y_hat = self(x, y)
 
                 # Loss function, y_perf is the performance realization
+                bs = x.size(0)
                 if self.pred_loss is None:
-                    loss = (1 / n_train) * self.perf_loss(z_star, y_perf.squeeze())
+                    loss = self.perf_loss(z_star, y_perf)
                 else:
-                    loss = (1 / n_train) * (
-                        self.perf_loss(z_star, y_perf.squeeze())
-                        + (self.pred_loss_factor / self.n_y)
-                        * self.pred_loss(y_hat, y_perf.squeeze()[0])
-                    )
+                    loss = self.perf_loss(z_star, y_perf) + (
+                        self.pred_loss_factor / self.n_y
+                    ) * self.pred_loss(y_hat, y_perf[:, 0, :])
+                loss = (bs / n_train) * loss
 
                 # Backward pass: backpropagation
                 loss.backward()
@@ -335,24 +344,24 @@ class e2e_net(nn.Module):
         if val_set is not None:
 
             # Number of elements in validation set
-            n_val = len(val_set)
+            n_val = len(val_set.dataset)
 
             val_loss = 0
             with torch.no_grad():
                 for t, (x, y, y_perf) in enumerate(val_set):
 
                     # Predict and optimize
-                    z_val, y_val = self(x.squeeze(), y.squeeze())
+                    z_val, y_val = self(x, y)
 
                     # Loss function
+                    bs = x.size(0)
                     if self.pred_loss_factor is None:
-                        loss = (1 / n_val) * self.perf_loss(z_val, y_perf.squeeze())
+                        loss = self.perf_loss(z_val, y_perf)
                     else:
-                        loss = (1 / n_val) * (
-                            self.perf_loss(z_val, y_perf.squeeze())
-                            + (self.pred_loss_factor / self.n_y)
-                            * self.pred_loss(y_val, y_perf.squeeze()[0])
-                        )
+                        loss = self.perf_loss(z_val, y_perf) + (
+                            self.pred_loss_factor / self.n_y
+                        ) * self.pred_loss(y_val, y_perf[:, 0, :])
+                    loss = (bs / n_val) * loss
 
                     # Accumulate loss
                     val_loss += loss.item()
@@ -362,7 +371,7 @@ class e2e_net(nn.Module):
     # -----------------------------------------------------------------------------------------------
     # net_cv: Cross validation of the e2e neural net for hyperparameter tuning
     # -----------------------------------------------------------------------------------------------
-    def net_cv(self, X, Y, lr_list, epoch_list, n_val=4):
+    def net_cv(self, X, Y, lr_list, epoch_list, n_val=4, batch_size: int = 1):
         """Neural net cross-validation module
 
         Inputs
@@ -398,12 +407,14 @@ class e2e_net(nn.Module):
                     train_set = DataLoader(
                         pc.SlidingWindow(
                             X_temp.train(), Y_temp.train(), self.n_obs, self.perf_period
-                        )
+                        ),
+                        batch_size=batch_size,
                     )
                     val_set = DataLoader(
                         pc.SlidingWindow(
                             X_temp.test(), Y_temp.test(), self.n_obs, self.perf_period
-                        )
+                        ),
+                        batch_size=batch_size,
                     )
 
                     # Reset learnable parameters gamma and delta
@@ -459,7 +470,7 @@ class e2e_net(nn.Module):
     # -----------------------------------------------------------------------------------------------
     # net_roll_test: Test the e2e neural net
     # -----------------------------------------------------------------------------------------------
-    def net_roll_test(self, X, Y, n_roll=4, lr=None, epochs=None):
+    def net_roll_test(self, X, Y, n_roll=4, lr=None, epochs=None, batch_size: int = 1):
         """Neural net rolling window out-of-sample test
 
         Inputs
@@ -509,9 +520,13 @@ class e2e_net(nn.Module):
 
             X.split_update(split), Y.split_update(split)
             train_set = DataLoader(
-                pc.SlidingWindow(X.train(), Y.train(), self.n_obs, self.perf_period)
+                pc.SlidingWindow(X.train(), Y.train(), self.n_obs, self.perf_period),
+                batch_size=batch_size,
             )
-            test_set = DataLoader(pc.SlidingWindow(X.test(), Y.test(), self.n_obs, 0))
+            test_set = DataLoader(
+                pc.SlidingWindow(X.test(), Y.test(), self.n_obs, 0),
+                batch_size=batch_size,
+            )
 
             # Reset learnable parameters gamma and delta
             self.load_state_dict(torch.load(self.init_state_path, weights_only=True))
@@ -557,13 +572,12 @@ class e2e_net(nn.Module):
             with torch.no_grad():
                 for j, (x, y, y_perf) in enumerate(test_set):
 
-                    # Predict and optimize
-                    z_star, _ = self(x.squeeze(), y.squeeze())
+                    z_star, _ = self(x, y)
 
-                    # Store portfolio weights and returns for each time step 't'
-                    portfolio.weights[t] = z_star.squeeze()
-                    portfolio.rets[t] = y_perf.squeeze() @ portfolio.weights[t]
-                    t += 1
+                    bsz = x.size(0)
+                    portfolio.weights[t : t + bsz] = z_star.squeeze()
+                    portfolio.rets[t : t + bsz] = (y_perf[:, 0, :] * portfolio.weights[t : t + bsz]).sum(dim=1)
+                    t += bsz
 
         # Reset dataset
         X, Y = X.split_update(init_split), Y.split_update(init_split)

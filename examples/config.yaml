@@ -10,4 +10,5 @@ hyperparams:
   dr_layer: hellinger
   lr_list: [0.005]
   epoch_list: [5]
+  batch_size: 16
 

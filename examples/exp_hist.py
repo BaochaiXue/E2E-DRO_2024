@@ -147,6 +147,9 @@ lr_list = HYP.get("lr_list", [0.005])
 # List of total no. of epochs to test
 epoch_list = HYP.get("epoch_list", [5])
 
+# Batch size for DataLoader objects
+batch_size = HYP.get("batch_size", 1)
+
 # For replicability, set the random seed for the numerical experiments
 set_seed = HYP.get("set_seed", 1000)
 
@@ -192,7 +195,7 @@ else:
 
     # Exp 1: Equal weight portfolio
     ew_net = bm.equal_weight(n_x, n_y, n_obs)
-    ew_net.net_roll_test(X, Y, n_roll=4)
+    ew_net.net_roll_test(X, Y, n_roll=4, batch_size=batch_size)
     save_model(
         ew_net,
         cache_path + "ew_net.pt",
@@ -203,7 +206,7 @@ else:
 
     # Exp 1, 2, 3: Predict-then-optimize system
     po_net = bm.pred_then_opt(n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk).double()
-    po_net.net_roll_test(X, Y)
+    po_net.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         po_net,
         cache_path + "po_net.pt",
@@ -227,8 +230,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    base_net.net_cv(X, Y, lr_list, epoch_list)
-    base_net.net_roll_test(X, Y)
+    base_net.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    base_net.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         base_net,
         cache_path + "base_net.pt",
@@ -267,8 +270,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    nom_net.net_cv(X, Y, lr_list, epoch_list)
-    nom_net.net_roll_test(X, Y)
+    nom_net.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    nom_net.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         nom_net,
         cache_path + "nom_net.pt",
@@ -307,8 +310,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    dr_net.net_cv(X, Y, lr_list, epoch_list)
-    dr_net.net_roll_test(X, Y)
+    dr_net.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    dr_net.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         dr_net,
         cache_path + "dr_net.pt",
@@ -335,7 +338,7 @@ else:
     dr_po_net = bm.pred_then_opt(
         n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk, opt_layer=dr_layer
     ).double()
-    dr_po_net.net_roll_test(X, Y)
+    dr_po_net.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         dr_po_net,
         cache_path + "dr_po_net.pt",
@@ -367,8 +370,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    dr_net_learn_delta.net_cv(X, Y, lr_list, epoch_list)
-    dr_net_learn_delta.net_roll_test(X, Y)
+    dr_net_learn_delta.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    dr_net_learn_delta.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         dr_net_learn_delta,
         cache_path + "dr_net_learn_delta.pt",
@@ -407,8 +410,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    nom_net_learn_gamma.net_cv(X, Y, lr_list, epoch_list)
-    nom_net_learn_gamma.net_roll_test(X, Y)
+    nom_net_learn_gamma.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    nom_net_learn_gamma.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         nom_net_learn_gamma,
         cache_path + "nom_net_learn_gamma.pt",
@@ -447,8 +450,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    dr_net_learn_gamma.net_cv(X, Y, lr_list, epoch_list)
-    dr_net_learn_gamma.net_roll_test(X, Y)
+    dr_net_learn_gamma.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    dr_net_learn_gamma.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         dr_net_learn_gamma,
         cache_path + "dr_net_learn_gamma.pt",
@@ -487,8 +490,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    nom_net_learn_theta.net_cv(X, Y, lr_list, epoch_list)
-    nom_net_learn_theta.net_roll_test(X, Y)
+    nom_net_learn_theta.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    nom_net_learn_theta.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         nom_net_learn_theta,
         cache_path + "nom_net_learn_theta.pt",
@@ -527,8 +530,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    dr_net_learn_theta.net_cv(X, Y, lr_list, epoch_list)
-    dr_net_learn_theta.net_roll_test(X, Y)
+    dr_net_learn_theta.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    dr_net_learn_theta.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         dr_net_learn_theta,
         cache_path + "dr_net_learn_theta.pt",
@@ -567,8 +570,8 @@ else:
         perf_period=perf_period,
         pred_loss_factor=pred_loss_factor,
     ).double()
-    dr_net_learn_gamma_delta.net_cv(X, Y, lr_list, epoch_list)
-    dr_net_learn_gamma_delta.net_roll_test(X, Y)
+    dr_net_learn_gamma_delta.net_cv(X, Y, lr_list, epoch_list, batch_size=batch_size)
+    dr_net_learn_gamma_delta.net_roll_test(X, Y, batch_size=batch_size)
     save_model(
         dr_net_learn_gamma_delta,
         cache_path + "dr_net_learn_gamma_delta.pt",
