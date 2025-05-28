@@ -3,7 +3,7 @@
 ####################################################################################################
 # Import libraries
 ####################################################################################################
-import pickle
+import dill as pickle
 import torch
 import pandas as pd
 import matplotlib.pyplot as plt
