@@ -182,11 +182,9 @@ class e2e_net(nn.Module):
 
         # Store initial model
         if train_gamma and train_delta:
-            self.init_state_path = (
-                cache_path + self.model_type + "_initial_state_" + pred_model
-            )
+            base_path = cache_path + self.model_type + "_initial_state_" + pred_model
         elif train_delta and not train_gamma:
-            self.init_state_path = (
+            base_path = (
                 cache_path
                 + self.model_type
                 + "_initial_state_"
@@ -195,7 +193,7 @@ class e2e_net(nn.Module):
                 + str(train_gamma)
             )
         elif train_gamma and not train_delta:
-            self.init_state_path = (
+            base_path = (
                 cache_path
                 + self.model_type
                 + "_initial_state_"
@@ -203,8 +201,8 @@ class e2e_net(nn.Module):
                 + "_TrainDelta"
                 + str(train_delta)
             )
-        elif not train_gamma and not train_delta:
-            self.init_state_path = (
+        else:
+            base_path = (
                 cache_path
                 + self.model_type
                 + "_initial_state_"
@@ -214,6 +212,9 @@ class e2e_net(nn.Module):
                 + "_TrainDelta"
                 + str(train_delta)
             )
+
+        self.init_state_base = base_path
+        self.init_state_path = base_path + ".pt"
         torch.save(self.state_dict(), self.init_state_path)
 
     # -----------------------------------------------------------------------------------------------
@@ -443,7 +444,7 @@ class e2e_net(nn.Module):
 
         # Convert results to dataframe
         self.cv_results = results.df()
-        self.cv_results.to_pickle(self.init_state_path + "_results.pkl")
+        self.cv_results.to_pickle(self.init_state_base + "_results.pkl")
 
         # Select and store the optimal hyperparameters
         idx = self.cv_results.val_loss.idxmin()

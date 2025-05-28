@@ -3,7 +3,6 @@
 ####################################################################################################
 # Import libraries
 ####################################################################################################
-import dill as pickle
 import torch
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -113,56 +112,32 @@ use_cache = False
 
 if use_cache:
     # Load cached models and backtest results
-    with open(cache_path + "ew_net.pkl", "rb") as inp:
-        ew_net = pickle.load(inp)
-    with open(cache_path + "po_net.pkl", "rb") as inp:
-        po_net = pickle.load(inp)
-    with open(cache_path + "base_net.pkl", "rb") as inp:
-        base_net = pickle.load(inp)
-    with open(cache_path + "nom_net.pkl", "rb") as inp:
-        nom_net = pickle.load(inp)
-    with open(cache_path + "dr_net.pkl", "rb") as inp:
-        dr_net = pickle.load(inp)
-    with open(cache_path + "dr_po_net.pkl", "rb") as inp:
-        dr_po_net = pickle.load(inp)
-    with open(cache_path + "dr_net_learn_delta.pkl", "rb") as inp:
-        dr_net_learn_delta = pickle.load(inp)
-    with open(cache_path + "nom_net_learn_gamma.pkl", "rb") as inp:
-        nom_net_learn_gamma = pickle.load(inp)
-    with open(cache_path + "dr_net_learn_gamma.pkl", "rb") as inp:
-        dr_net_learn_gamma = pickle.load(inp)
-    with open(cache_path + "dr_net_learn_gamma_delta.pkl", "rb") as inp:
-        dr_net_learn_gamma_delta = pickle.load(inp)
-    with open(cache_path + "nom_net_learn_theta.pkl", "rb") as inp:
-        nom_net_learn_theta = pickle.load(inp)
-    with open(cache_path + "dr_net_learn_theta.pkl", "rb") as inp:
-        dr_net_learn_theta = pickle.load(inp)
+    ew_net = torch.load(cache_path + "ew_net.pt")
+    po_net = torch.load(cache_path + "po_net.pt")
+    base_net = torch.load(cache_path + "base_net.pt")
+    nom_net = torch.load(cache_path + "nom_net.pt")
+    dr_net = torch.load(cache_path + "dr_net.pt")
+    dr_po_net = torch.load(cache_path + "dr_po_net.pt")
+    dr_net_learn_delta = torch.load(cache_path + "dr_net_learn_delta.pt")
+    nom_net_learn_gamma = torch.load(cache_path + "nom_net_learn_gamma.pt")
+    dr_net_learn_gamma = torch.load(cache_path + "dr_net_learn_gamma.pt")
+    dr_net_learn_gamma_delta = torch.load(cache_path + "dr_net_learn_gamma_delta.pt")
+    nom_net_learn_theta = torch.load(cache_path + "nom_net_learn_theta.pt")
+    dr_net_learn_theta = torch.load(cache_path + "dr_net_learn_theta.pt")
 
-    with open(cache_path + "base_net_ext.pkl", "rb") as inp:
-        base_net_ext = pickle.load(inp)
-    with open(cache_path + "nom_net_ext.pkl", "rb") as inp:
-        nom_net_ext = pickle.load(inp)
-    with open(cache_path + "dr_net_ext.pkl", "rb") as inp:
-        dr_net_ext = pickle.load(inp)
-    with open(cache_path + "dr_net_learn_delta_ext.pkl", "rb") as inp:
-        dr_net_learn_delta_ext = pickle.load(inp)
-    with open(cache_path + "nom_net_learn_gamma_ext.pkl", "rb") as inp:
-        nom_net_learn_gamma_ext = pickle.load(inp)
-    with open(cache_path + "dr_net_learn_gamma_ext.pkl", "rb") as inp:
-        dr_net_learn_gamma_ext = pickle.load(inp)
-    with open(cache_path + "nom_net_learn_theta_ext.pkl", "rb") as inp:
-        nom_net_learn_theta_ext = pickle.load(inp)
-    with open(cache_path + "dr_net_learn_theta_ext.pkl", "rb") as inp:
-        dr_net_learn_theta_ext = pickle.load(inp)
+    base_net_ext = torch.load(cache_path + "base_net_ext.pt")
+    nom_net_ext = torch.load(cache_path + "nom_net_ext.pt")
+    dr_net_ext = torch.load(cache_path + "dr_net_ext.pt")
+    dr_net_learn_delta_ext = torch.load(cache_path + "dr_net_learn_delta_ext.pt")
+    nom_net_learn_gamma_ext = torch.load(cache_path + "nom_net_learn_gamma_ext.pt")
+    dr_net_learn_gamma_ext = torch.load(cache_path + "dr_net_learn_gamma_ext.pt")
+    nom_net_learn_theta_ext = torch.load(cache_path + "nom_net_learn_theta_ext.pt")
+    dr_net_learn_theta_ext = torch.load(cache_path + "dr_net_learn_theta_ext.pt")
 
-    with open(cache_path + "dr_net_tv.pkl", "rb") as inp:
-        dr_net_tv = pickle.load(inp)
-    with open(cache_path + "dr_net_tv_learn_delta.pkl", "rb") as inp:
-        dr_net_tv_learn_delta = pickle.load(inp)
-    with open(cache_path + "dr_net_tv_learn_gamma.pkl", "rb") as inp:
-        dr_net_tv_learn_gamma = pickle.load(inp)
-    with open(cache_path + "dr_net_tv_learn_theta.pkl", "rb") as inp:
-        dr_net_tv_learn_theta = pickle.load(inp)
+    dr_net_tv = torch.load(cache_path + "dr_net_tv.pt")
+    dr_net_tv_learn_delta = torch.load(cache_path + "dr_net_tv_learn_delta.pt")
+    dr_net_tv_learn_gamma = torch.load(cache_path + "dr_net_tv_learn_gamma.pt")
+    dr_net_tv_learn_theta = torch.load(cache_path + "dr_net_tv_learn_theta.pt")
 else:
     # Import here to avoid importing heavy dependencies when using only the
     # equal-weight example. ``e2edro`` requires ``cvxpylayers`` and ``diffcp``.
@@ -171,15 +146,13 @@ else:
     # Exp 1: Equal weight portfolio
     ew_net = bm.equal_weight(n_x, n_y, n_obs)
     ew_net.net_roll_test(X, Y, n_roll=4)
-    with open(cache_path + "ew_net.pkl", "wb") as outp:
-        pickle.dump(ew_net, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(ew_net, cache_path + "ew_net.pt")
     print("ew_net run complete")
 
     # Exp 1, 2, 3: Predict-then-optimize system
     po_net = bm.pred_then_opt(n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk).double()
     po_net.net_roll_test(X, Y)
-    with open(cache_path + "po_net.pkl", "wb") as outp:
-        pickle.dump(po_net, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(po_net, cache_path + "po_net.pt")
     print("po_net run complete")
 
     # Exp 1: Base E2E
@@ -199,8 +172,7 @@ else:
     ).double()
     base_net.net_cv(X, Y, lr_list, epoch_list)
     base_net.net_roll_test(X, Y)
-    with open(cache_path + "base_net.pkl", "wb") as outp:
-        pickle.dump(base_net, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(base_net, cache_path + "base_net.pt")
     print("base_net run complete")
 
     # Exp 1: Nominal E2E
@@ -221,8 +193,7 @@ else:
     ).double()
     nom_net.net_cv(X, Y, lr_list, epoch_list)
     nom_net.net_roll_test(X, Y)
-    with open(cache_path + "nom_net.pkl", "wb") as outp:
-        pickle.dump(nom_net, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(nom_net, cache_path + "nom_net.pt")
     print("nom_net run complete")
 
     # Exp 1: DR E2E
@@ -243,8 +214,7 @@ else:
     ).double()
     dr_net.net_cv(X, Y, lr_list, epoch_list)
     dr_net.net_roll_test(X, Y)
-    with open(cache_path + "dr_net.pkl", "wb") as outp:
-        pickle.dump(dr_net, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_net, cache_path + "dr_net.pt")
     print("dr_net run complete")
 
     # Exp 2: DR predict-then-optimize system
@@ -252,8 +222,7 @@ else:
         n_x, n_y, n_obs, set_seed=set_seed, prisk=prisk, opt_layer=dr_layer
     ).double()
     dr_po_net.net_roll_test(X, Y)
-    with open(cache_path + "dr_po_net.pkl", "wb") as outp:
-        pickle.dump(dr_po_net, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_po_net, cache_path + "dr_po_net.pt")
     print("dr_po_net run complete")
 
     # Exp 2: DR E2E (fixed theta and gamma, learn delta)
@@ -274,8 +243,7 @@ else:
     ).double()
     dr_net_learn_delta.net_cv(X, Y, lr_list, epoch_list)
     dr_net_learn_delta.net_roll_test(X, Y)
-    with open(cache_path + "dr_net_learn_delta.pkl", "wb") as outp:
-        pickle.dump(dr_net_learn_delta, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_net_learn_delta, cache_path + "dr_net_learn_delta.pt")
     print("dr_net_learn_delta run complete")
 
     # Exp 3: Nominal E2E (fixed theta, learn gamma)
@@ -296,8 +264,7 @@ else:
     ).double()
     nom_net_learn_gamma.net_cv(X, Y, lr_list, epoch_list)
     nom_net_learn_gamma.net_roll_test(X, Y)
-    with open(cache_path + "nom_net_learn_gamma.pkl", "wb") as outp:
-        pickle.dump(nom_net_learn_gamma, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(nom_net_learn_gamma, cache_path + "nom_net_learn_gamma.pt")
     print("nom_net_learn_gamma run complete")
 
     # Exp 3: DR E2E (fixed theta, learn gamma, fixed delta)
@@ -318,8 +285,7 @@ else:
     ).double()
     dr_net_learn_gamma.net_cv(X, Y, lr_list, epoch_list)
     dr_net_learn_gamma.net_roll_test(X, Y)
-    with open(cache_path + "dr_net_learn_gamma.pkl", "wb") as outp:
-        pickle.dump(dr_net_learn_gamma, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_net_learn_gamma, cache_path + "dr_net_learn_gamma.pt")
     print("dr_net_learn_gamma run complete")
 
     # Exp 4: Nominal E2E (learn theta, fixed gamma)
@@ -340,8 +306,7 @@ else:
     ).double()
     nom_net_learn_theta.net_cv(X, Y, lr_list, epoch_list)
     nom_net_learn_theta.net_roll_test(X, Y)
-    with open(cache_path + "nom_net_learn_theta.pkl", "wb") as outp:
-        pickle.dump(nom_net_learn_theta, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(nom_net_learn_theta, cache_path + "nom_net_learn_theta.pt")
     print("nom_net_learn_theta run complete")
 
     # Exp 4: DR E2E (learn theta, fixed gamma and delta)
@@ -362,8 +327,7 @@ else:
     ).double()
     dr_net_learn_theta.net_cv(X, Y, lr_list, epoch_list)
     dr_net_learn_theta.net_roll_test(X, Y)
-    with open(cache_path + "dr_net_learn_theta.pkl", "wb") as outp:
-        pickle.dump(dr_net_learn_theta, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_net_learn_theta, cache_path + "dr_net_learn_theta.pt")
     print("dr_net_learn_theta run complete")
 
     # Exp 5: DR E2E (learn gamma, delta, fixed theta)
@@ -384,8 +348,7 @@ else:
     ).double()
     dr_net_learn_gamma_delta.net_cv(X, Y, lr_list, epoch_list)
     dr_net_learn_gamma_delta.net_roll_test(X, Y)
-    with open(cache_path + "dr_net_learn_gamma_delta.pkl", "wb") as outp:
-        pickle.dump(dr_net_learn_gamma_delta, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_net_learn_gamma_delta, cache_path + "dr_net_learn_gamma_delta.pt")
     print("dr_net_learn_gamma_delta run complete")
 
 ####################################################################################################
@@ -780,18 +743,12 @@ use_cache = False
 # Run
 # ---------------------------------------------------------------------------------------------------
 if use_cache:
-    with open(cache_path_exp5 + "nom_net_linear.pkl", "rb") as inp:
-        nom_net_linear = pickle.load(inp)
-    with open(cache_path_exp5 + "nom_net_2layer.pkl", "rb") as inp:
-        nom_net_2layer = pickle.load(inp)
-    with open(cache_path_exp5 + "nom_net_3layer.pkl", "rb") as inp:
-        nom_net_3layer = pickle.load(inp)
-    with open(cache_path_exp5 + "dr_net_linear.pkl", "rb") as inp:
-        dr_net_linear = pickle.load(inp)
-    with open(cache_path_exp5 + "dr_net_2layer.pkl", "rb") as inp:
-        dr_net_2layer = pickle.load(inp)
-    with open(cache_path_exp5 + "dr_net_3layer.pkl", "rb") as inp:
-        dr_net_3layer = pickle.load(inp)
+    nom_net_linear = torch.load(cache_path_exp5 + "nom_net_linear.pt")
+    nom_net_2layer = torch.load(cache_path_exp5 + "nom_net_2layer.pt")
+    nom_net_3layer = torch.load(cache_path_exp5 + "nom_net_3layer.pt")
+    dr_net_linear = torch.load(cache_path_exp5 + "dr_net_linear.pt")
+    dr_net_2layer = torch.load(cache_path_exp5 + "dr_net_2layer.pt")
+    dr_net_3layer = torch.load(cache_path_exp5 + "dr_net_3layer.pt")
 else:
 
     # Import heavy dependencies only when running the synthetic examples that rely on the differentiable optimization layers.
@@ -821,8 +778,7 @@ else:
     ).double()
     nom_net_linear.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     nom_net_linear.net_roll_test(X, Y, n_roll=1)
-    with open(cache_path + "nom_net_linear.pkl", "wb") as outp:
-        pickle.dump(nom_net_linear, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(nom_net_linear, cache_path + "nom_net_linear.pt")
     print("nom_net_linear run complete")
 
     # DR E2E linear
@@ -842,8 +798,7 @@ else:
     ).double()
     dr_net_linear.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     dr_net_linear.net_roll_test(X, Y, n_roll=1)
-    with open(cache_path + "dr_net_linear.pkl", "wb") as outp:
-        pickle.dump(dr_net_linear, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_net_linear, cache_path + "dr_net_linear.pt")
     print("dr_net_linear run complete")
 
     # ***********************************************************************************************
@@ -871,8 +826,7 @@ else:
     ).double()
     nom_net_2layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     nom_net_2layer.net_roll_test(X, Y, n_roll=1)
-    with open(cache_path + "nom_net_2layer.pkl", "wb") as outp:
-        pickle.dump(nom_net_2layer, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(nom_net_2layer, cache_path + "nom_net_2layer.pt")
     print("nom_net_2layer run complete")
 
     # DR E2E 2-layer
@@ -893,8 +847,7 @@ else:
     ).double()
     dr_net_2layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     dr_net_2layer.net_roll_test(X, Y, n_roll=1)
-    with open(cache_path + "dr_net_2layer.pkl", "wb") as outp:
-        pickle.dump(dr_net_2layer, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_net_2layer, cache_path + "dr_net_2layer.pt")
     print("dr_net_2layer run complete")
 
     # ***********************************************************************************************
@@ -922,8 +875,7 @@ else:
     ).double()
     nom_net_3layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     nom_net_3layer.net_roll_test(X, Y, n_roll=1)
-    with open(cache_path + "nom_net_3layer.pkl", "wb") as outp:
-        pickle.dump(nom_net_3layer, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(nom_net_3layer, cache_path + "nom_net_3layer.pt")
     print("nom_net_3layer run complete")
 
     # DR E2E 3-layer
@@ -944,8 +896,7 @@ else:
     ).double()
     dr_net_3layer.net_cv(X, Y, lr_list, epoch_list, n_val=1)
     dr_net_3layer.net_roll_test(X, Y, n_roll=1)
-    with open(cache_path + "dr_net_3layer.pkl", "wb") as outp:
-        pickle.dump(dr_net_3layer, outp, pickle.HIGHEST_PROTOCOL)
+    torch.save(dr_net_3layer, cache_path + "dr_net_3layer.pt")
     print("dr_net_3layer run complete")
 
 # ---------------------------------------------------------------------------------------------------

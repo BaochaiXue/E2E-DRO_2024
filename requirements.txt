@@ -10,4 +10,3 @@ pandas_datareader>=0.10
 yfinance>=0.2
 psutil>=5.9
 statsmodels>=0.14
-dill>=0.3
