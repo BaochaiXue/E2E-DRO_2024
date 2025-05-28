@@ -74,6 +74,26 @@ The scripts cache downloaded data and intermediate results in the
 These folders are created automatically when running the loader so no manual
 setup is required.
 
+## Experiment Descriptions
+
+The `examples/config.yaml` file lists five experiments. Each corresponds to a
+different training scenario:
+
+- **exp1** – *General evaluation*: evaluates equal-weight, predict‑then‑optimize,
+  base, nominal and distributionally robust (DR) systems on historical data.
+  All parameters are learnable.
+- **exp2** – *Learning delta*: keeps the prediction weights and risk appetite
+  fixed while learning the DR robustness size \(\delta\) to gauge its impact.
+- **exp3** – *Learning gamma*: fixes the prediction weights but learns the
+  risk‑aversion parameter \(\gamma\), optionally together with \(\delta\).
+- **exp4** – *Learning \(\theta\)*: focuses on updating the prediction layer
+  while \(\gamma\) (and \(\delta\)) remain fixed, comparing base, nominal and DR
+  models.
+- **exp5** – *Synthetic data*: applies nominal and DR systems to synthetic
+  returns using linear, two‑layer and three‑layer networks.
+
+Edit the YAML file to enable or disable specific experiments as needed.
+
 ## Testing
 
 Basic tests are provided using `pytest`:
